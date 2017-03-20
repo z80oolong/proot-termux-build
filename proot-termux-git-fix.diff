@@ -1,0 +1,36 @@
+diff --git a/src/GNUmakefile b/src/GNUmakefile
+index b74b3a3..91b46f8 100644
+--- a/src/GNUmakefile
++++ b/src/GNUmakefile
+@@ -5,6 +5,7 @@
+ VPATH := $(dir $(lastword $(MAKEFILE_LIST)))
+ SRC    = $(dir $(firstword $(MAKEFILE_LIST)))
+ 
++CROSS_COMPILE=/usr/bin/arm-linux-gnueabihf-
+ GIT      = git
+ RM       = rm
+ INSTALL  = install
+@@ -14,9 +15,9 @@ STRIP    ?= $(CROSS_COMPILE)strip
+ OBJCOPY  ?= $(CROSS_COMPILE)objcopy
+ OBJDUMP  ?= $(CROSS_COMPILE)objdump
+ 
+-CPPFLAGS += -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -I. -I$(VPATH)
++CPPFLAGS += -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -I. -I/usr/arm-linux-gnueabihf/include -I${BUILD_PREFIX}/include -I$(VPATH)
+ CFLAGS   += -Wall -Wextra -O2
+-LDFLAGS  += -ltalloc -Wl,-z,noexecstack
++LDFLAGS  += -L/usr/arm-linux-gnueabihf/lib -L${BUILD_PREFIX}/lib -static -ltalloc -Wl,-z,noexecstack
+ 
+ OBJECTS += \
+ 	cli/cli.o		\
+@@ -133,9 +134,9 @@ LINK    = $($(quiet)LD) -o $@ $^ $(LDFLAGS)
+ OBJIFY = $($(quiet)GEN)									\
+ 	$(OBJCOPY)									\
+ 		--input binary								\
+-		--output `env LANG=C $(OBJDUMP) -f cli/cli.o |				\
++		--output `env LC_ALL=C $(OBJDUMP) -f cli/cli.o |				\
+ 			grep 'file format' | awk '{print $$4}'`				\
+-		--binary-architecture `env LANG=C $(OBJDUMP) -f cli/cli.o |		\
++		--binary-architecture `env LC_ALL=C $(OBJDUMP) -f cli/cli.o |		\
+ 				grep architecture | cut -f 1 -d , | awk '{print $$2}'`	\
+ 		$< $@
+ 

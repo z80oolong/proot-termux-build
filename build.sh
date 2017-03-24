@@ -1,5 +1,6 @@
 #!/bin/bash
 export BUILD_PREFIX=${PWD}/opt
+#export BUILD_HOST=
 export BUILD_HOST=arm-linux-gnueabihf
 
 if [ "x${BUILD_HOST}" = "x" ]; then
@@ -8,8 +9,13 @@ if [ "x${BUILD_HOST}" = "x" ]; then
   export AR=ar
   export RANLIB=ranlib
   export LD=ld
-  export CFLAGS=""
-  export LDFLAGS=""
+  if [ "x${BUILD_HOST}" = "xarm-linux-gnueabihf" ]; then
+    export CFLAGS="-mthumb"
+    export LDFLAGS=""
+  else
+    export CFLAGS=""
+    export LDFLAGS=""
+  fi 
 else
   export CROSS_COMPILE=/usr/bin/${BUILD_HOST}-
   export CC=${CROSS_COMPILE}gcc
@@ -17,8 +23,13 @@ else
   export AR=${CROSS_COMPILE}ar
   export RANLIB=${CROSS_COMPILE}ranlib
   export LD=${CROSS_COMPILE}ld
-  export CFLAGS="-mthumb -I/usr/${BUILD_HOST}/include"
-  export LDFLAGS="-L/usr/${BUILD_HOST}/lib"
+  if [ "x${BUILD_HOST}" = "xarm-linux-gnueabihf" ]; then
+    export CFLAGS="-mthumb -I/usr/${BUILD_HOST}/include"
+    export LDFLAGS="-L/usr/${BUILD_HOST}/lib"
+  else
+    export CFLAGS="-I/usr/${BUILD_HOST}/include"
+    export LDFLAGS="-L/usr/${BUILD_HOST}/lib"
+  fi
 fi
 
 [ -e ./talloc-2.1.9.tar.gz ] || wget https://download.samba.org/pub/talloc/talloc-2.1.9.tar.gz
@@ -33,7 +44,7 @@ install -v -m 0644 bin/default/libtalloc.a ${BUILD_PREFIX}/lib
 
 cd ..
 
-[ -d ./proot-termux-git ] || git clone https://github.com/termux/proot.git ./proot-termux-git
+[ -d ./proot-termux-git ] || git submodule add https://github.com/termux/proot.git ./proot-termux-git
 
 cd ./proot-termux-git
 git checkout a01472c8 || git checkout -b a01472c8 a01472c8

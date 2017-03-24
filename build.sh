@@ -1,17 +1,27 @@
 #!/bin/bash
 export BUILD_PREFIX=${PWD}/opt
 export BUILD_HOST=arm-linux-gnueabihf
-export CROSS_COMPILE=/usr/bin/${BUILD_HOST}-
 
-export CC=${CROSS_COMPILE}gcc
-export CPP=${CROSS_COMPILE}cpp
-export AR=${CROSS_COMPILE}ar
-export RANLIB=${CROSS_COMPILE}ranlib
-export LD=${CROSS_COMPILE}ld
-export CFLAGS="-mthumb -I/usr/${BUILD_HOST}/include"
-export LDFLAGS="-L/usr/${BUILD_HOST}/lib"
+if [ "x${BUILD_HOST}" = "x" ]; then
+  export CC=gcc
+  export CPP=cpp
+  export AR=ar
+  export RANLIB=ranlib
+  export LD=ld
+  export CFLAGS=""
+  export LDFLAGS=""
+else
+  export CROSS_COMPILE=/usr/bin/${BUILD_HOST}-
+  export CC=${CROSS_COMPILE}gcc
+  export CPP=${CROSS_COMPILE}cpp
+  export AR=${CROSS_COMPILE}ar
+  export RANLIB=${CROSS_COMPILE}ranlib
+  export LD=${CROSS_COMPILE}ld
+  export CFLAGS="-mthumb -I/usr/${BUILD_HOST}/include"
+  export LDFLAGS="-L/usr/${BUILD_HOST}/lib"
+fi
 
-wget https://download.samba.org/pub/talloc/talloc-2.1.9.tar.gz
+[ -e ./talloc-2.1.9.tar.gz ] || wget https://download.samba.org/pub/talloc/talloc-2.1.9.tar.gz
 tar -zxvf talloc-2.1.9.tar.gz
 
 cd ./talloc-2.1.9
@@ -23,9 +33,10 @@ install -v -m 0644 bin/default/libtalloc.a ${BUILD_PREFIX}/lib
 
 cd ..
 
-git clone https://github.com/termux/proot.git ./proot-termux-git
+[ -d ./proot-termux-git ] || git clone https://github.com/termux/proot.git ./proot-termux-git
 
 cd ./proot-termux-git
+git checkout a01472c8 || git checkout -b a01472c8 a01472c8
 
 patch -p1 < ../proot-termux-git-fix.diff
 

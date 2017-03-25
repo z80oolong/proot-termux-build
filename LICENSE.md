@@ -1,5 +1,19 @@
 # LICENSE
 
+## License of Makefile, talloc-cross-answer.txt
+
+Copyright (C) Z.OOL. <zool@zool.jpn.org> 2017
+
+This program is free software; you can redistribute it and/or modify it  
+under the terms of the GNU Lesser General Public License as published by the  
+Free Software Foundation; either version 3 of the License, or (at your option)  
+any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT  
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or  
+FITNESS FOR A PRTICULAR PURPOSE. See the GNU General Public License for more  
+details.
+
 ## License of talloc 2.1.9
 
 Copyright (C) Andrew Tridgell 2004
@@ -17,7 +31,7 @@ details.
 You should have received a copy of the GNU General Public License along with  
 this program; if not, see http://www.gnu.org/licenses/.
 
-## License of PRoot
+## Copyright holder for PRoot
 
 The copyright holder for PRoot and CARE is STMicroelectronics, these  
 tools are developed in the Compilation Expertise Center by:
@@ -51,6 +65,8 @@ Denis FERRANTI <denis.ferranti@st.com>
 
 Paul GHALEB <paul.ghaleb@st.com>  
         User manual review.
+
+## GPL version 2 (License of PRoot)
 
                     GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991

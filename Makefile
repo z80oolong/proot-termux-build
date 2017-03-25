@@ -26,6 +26,8 @@ LD=${CROSS_COMPILE}ld
 OBJCOPY=${CROSS_COMPILE}objcopy
 OBJDUMP=${CROSS_COMPILE}objdump
 
+#CFLAGS=-I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
+#CPPFLAGS=-I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 CFLAGS=-mthumb -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 CPPFLAGS=-mthumb -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 LDFLAGS=-L${BUILD_PREFIX}/lib -L/usr/${BUILD_HOST}/lib

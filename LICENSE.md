@@ -1,8 +1,8 @@
 # LICENSE
 
-## License of Makefile and talloc-cross-answer.txt
+## License of Makefile and README.md
 
-Copyright (C) Z.OOL. (mailto:zool@zool.jpn.org) 2017
+Copyright (C) Z.OOL. ([mailto:zool@zool.jpn.org][01]) 2017
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License as published by the
@@ -15,9 +15,9 @@ FITNESS FOR A PRTICULAR PURPOSE. See the GNU General Public License for more
 details.
 
 You should have received a copy of the GNU General Public License along with
-this program; if not, see [http://www.gnu.org/licenses/][1].
+this program; if not, see [http://www.gnu.org/licenses/][02].
 
-## License of talloc 2.1.9
+## License of talloc
 
 Copyright (C) Andrew Tridgell 2004
 
@@ -32,9 +32,7 @@ FITNESS FOR A PRTICULAR PURPOSE. See the GNU General Public License for more
 details.
 
 You should have received a copy of the GNU General Public License along with
-this program; if not, see [http://www.gnu.org/licenses/][1]
-
-[1]:http://www.gnu.org/licenses/
+this program; if not, see [http://www.gnu.org/licenses/][02]
 
 ## License of PRoot
 
@@ -43,35 +41,40 @@ this program; if not, see [http://www.gnu.org/licenses/][1]
 The copyright holder for PRoot and CARE is STMicroelectronics, these  
 tools are developed in the Compilation Expertise Center by:
 
-Cédric VINCENT <cedric.vincent@st.com>  
+Cédric VINCENT <[cedric.vincent@st.com][03]>  
         Original author, maintainer.
 
-Rémi DURAFFORT <remi.duraffort@st.com>  
+Rémi DURAFFORT <[remi.duraffort@st.com][04]>  
         Improved the -0 feature, many experiments, bug reports, fixes, and articles.
 
-Christophe GUILLON <christophe.guillon@st.com>  
+Christophe GUILLON <[christophe.guillon@st.com][05]>  
         Improved CARE, plugin experiments, bug reports, and fixes.
 
-Yves JANIN <yves.janin@st.com>  
+Yves JANIN <[yves.janin@st.com][06]>  
         Support for the i386 architecture, many experiments and bug reports.
 
-Antoine MOYNAULT <antoine.moynault@st.com>  
+Antoine MOYNAULT <[antoine.moynault@st.com][07]>  
         Many experiments and bug reports.
 
-Claire ROBINE <claire.robine@st.com>  
+Claire ROBINE <[claire.robine@st.com][08]>  
         Many bug fixes.
 
-Clément BAZIN <clement@bazin-fr.org>  
+Clément BAZIN <[clement@bazin-fr.org][09]>  
         Plugins interface, dependency tracker plugin, and bug reports.
 
-Christian BERTIN <christian.bertin@st.com>  
+Christian BERTIN <[christian.bertin@st.com][10]>  
         Valuable support.
 
-Denis FERRANTI <denis.ferranti@st.com>  
+Denis FERRANTI <[denis.ferranti@st.com][11]>  
         Valuable support.
 
-Paul GHALEB <paul.ghaleb@st.com>  
+Paul GHALEB <[paul.ghaleb@st.com][12]>  
         User manual review.
+
+### Copyright holder for PRoot on Termux
+
+- Fredrik Fornwall <[fredrik@fornwall.net][13], [https://fornwall.net/][14]>
+- michalbednarski <[https://github.com/michalbednarski][15]>
 
 ### GNU public license version 2
 
@@ -408,3 +411,21 @@ proprietary programs.  If your program is a subroutine library, you may
 consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.
+
+<!-- URL List -->
+
+[01]:mailto:zool@zool.jpn.org
+[02]:http://www.gnu.org/licenses/
+[03]:mailto:cedric.vincent@st.com
+[04]:mailto:remi.duraffort@st.com
+[05]:mailto:christophe.guillon@st.com
+[06]:mailto:yves.janin@st.com
+[07]:mailto:antoine.moynault@st.com
+[08]:mailto:claire.robine@st.com
+[09]:mailto:clement@bazin-fr.org
+[10]:mailto:christian.bertin@st.com
+[11]:mailto:denis.ferranti@st.com
+[12]:mailto:paul.ghaleb@st.com
+[13]:mailto:fredrik@fornwall.net
+[14]:https://fornwall.net/
+[15]:https://github.com/michalbednarski

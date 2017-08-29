@@ -1,3 +1,0 @@
-[submodule "proot-termux-git"]
-	path = proot-termux-git
-	url = https://github.com/termux/proot.git

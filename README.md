@@ -23,7 +23,7 @@ sudo apt-get install g++-arm-linux-gnueabihf qemu-user qemu-user-static
 
 但し、この git リポジトリに同梱されている talloc 2.1.9 のソースコードである talloc-2.1.9.tar.gz は Andrew Tridgell 氏が著作権を有し、別添する LICENSE.md のうち、 "LICENSE of talloc 2.1.9" の項に記述されたライセンスの配布条件に従って配布されるものとします。
 
-そして、この git リポジトリ上のサブモジュールとして置かれているディレクトリ proot-termux-git 上の proot のソースコード及びこれらのソースコードより生成されたバイナリファイルである proot.{arm,x86} は STMicroelectronics 社及び termux の開発コミュニティが著作権を有し、別添する LICENSE.md のうち、 "LICENSE of PRoot" の項に記述されたライセンスの配布条件に従って配布されるものとします。
+そして、この git リポジトリに同梱されている proot のソースコードである proot-edc869d60c7f5b6abf67052a327ef099aded7777.zip 及びこれらのソースコードより生成されたバイナリファイルである proot.{arm,x86} は STMicroelectronics 社及び termux の開発コミュニティが著作権を有し、別添する LICENSE.md のうち、 "LICENSE of PRoot" の項に記述されたライセンスの配布条件に従って配布されるものとします。
 
 <!-- 外部リンク一覧 -->
 

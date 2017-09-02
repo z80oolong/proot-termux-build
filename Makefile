@@ -15,8 +15,7 @@ PROOT_COMMIT   = edc869d60c7f5b6abf67052a327ef099aded7777
 # Architecture
 
 ARCH = arm
-#ARCH = x86-32
-#ARCH = x86-64
+#ARCH = x86
 
 # Utilities for build
 

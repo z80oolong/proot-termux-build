@@ -15,13 +15,13 @@ sudo apt-get install build-essential git wget
 sudo apt-get install g++-arm-linux-gnueabihf qemu-user qemu-user-static
 ```
 
-そして、　```make build``` により make コマンドを起動すると、自動的に proot に依存する [talloc 2.1.10][3] をダウンロードしてビルドした後、 [termux の開発コミュニティの github のリポジトリ群][4]より [proot のリポジトリ][2]のうち、[コミットが edc869d6 のソースコード][5]を取得して proot のビルドを行います。
+そして、　```make build``` により make コマンドを起動すると、自動的に proot に依存する [talloc 2.1.10][3] をダウンロードしてビルドした後、 [termux の開発コミュニティの github のリポジトリ群][4]のうち、[コミットが edc869d6 のソースコード][5]を取得して proot のビルドを行います。
 
 ## 配布条件
 
-この git リポジトリに置かれている Makefile 及び talloc-cross-answer.txt は、 [Z.OOL. (mailto:zool@zool.jpn.org)][6] が著作権を有し、別添する LICENSE.md のうち、 "LICENSE of Makefile and talloc-cross-answer.txt" の項に記述されたライセンスの配布条件に従って配布されるものとします。
+この git リポジトリに置かれている本文書及び Makefile は、 [Z.OOL. (mailto:zool@zool.jpn.org)][6] が著作権を有し、別添する COPYING.md のうち、 "LICENSE of Makefile and README.md" の項に記述されたライセンスの配布条件に従って配布されるものとします。
 
-但し、この git リポジトリに同梱されている talloc 2.1.9 のソースコードである talloc-2.1.9.tar.gz は Andrew Tridgell 氏が著作権を有し、別添する LICENSE.md のうち、 "LICENSE of talloc 2.1.9" の項に記述されたライセンスの配布条件に従って配布されるものとします。
+但し、この git リポジトリに同梱されている talloc 2.1.9 のソースコードである talloc-2.1.10.tar.gz は Andrew Tridgell 氏が著作権を有し、別添する COPYING.md のうち、 "LICENSE of talloc 2.1.10" の項に記述されたライセンスの配布条件に従って配布されるものとします。
 
 そして、この git リポジトリに同梱されている proot のソースコードである proot-edc869d60c7f5b6abf67052a327ef099aded7777.zip 及びこれらのソースコードより生成されたバイナリファイルである proot.{arm,x86} は STMicroelectronics 社及び termux の開発コミュニティが著作権を有し、別添する LICENSE.md のうち、 "LICENSE of PRoot" の項に記述されたライセンスの配布条件に従って配布されるものとします。
 

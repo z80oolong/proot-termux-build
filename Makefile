@@ -10,13 +10,13 @@
 # version or commit of talloc and proot
 
 TALLOC_VERSION = 2.1.10
-PROOT_COMMIT   = edc869d60c7f5b6abf67052a327ef099aded7777
-#PROOT_COMMIT   = 6671bfed4ddcbd393d8ca7b2754d58e41ed9595b
+PROOT_COMMIT   = 454b0b121f03a662f53844a8865f518757e0a315
 
 # Architecture
 
 ARCH = arm
-#ARCH = x86
+#ARCH = x86-32
+#ARCH = x86-64
 
 # Utilities for build
 
@@ -86,69 +86,11 @@ LD      = ${CROSS_COMPILE}ld
 OBJCOPY = ${CROSS_COMPILE}objcopy
 OBJDUMP = ${CROSS_COMPILE}objdump
 
-# Build talloc
-
 all:	${PROOT_TERMUX_FIX_DIFF} ${ANSTXT} make_install_talloc make_install_proot
 
-${ANSTXT}:
-	${ECHO} 'Checking uname sysname type: "Linux"'                         >  ${ANSTXT}
-	${ECHO} 'Checking uname machine type: "do not care"'                   >> ${ANSTXT}
-	${ECHO} 'Checking uname release type: "do not care"'                   >> ${ANSTXT}
-	${ECHO} 'Checking uname version type: "do not care"'                   >> ${ANSTXT}
-	${ECHO} 'Checking simple C program: OK'                                >> ${ANSTXT}
-	${ECHO} 'building library support: OK'                                 >> ${ANSTXT}
-	${ECHO} 'Checking for large file support: OK'                          >> ${ANSTXT}
-	${ECHO} 'Checking for -D_FILE_OFFSET_BITS=64: OK'                      >> ${ANSTXT}
-	${ECHO} 'Checking for WORDS_BIGENDIAN: OK'                             >> ${ANSTXT}
-	${ECHO} 'Checking for C99 vsnprintf: OK'                               >> ${ANSTXT}
-	${ECHO} 'Checking for HAVE_SECURE_MKSTEMP: OK'                         >> ${ANSTXT}
-	${ECHO} 'rpath library support: OK'                                    >> ${ANSTXT}
-	${ECHO} '-Wl,--version-script support: FAIL'                           >> ${ANSTXT}
-	${ECHO} 'Checking correct behavior of strtoll: OK'                     >> ${ANSTXT}
-	${ECHO} 'Checking correct behavior of strptime: OK'                    >> ${ANSTXT}
-	${ECHO} 'Checking for HAVE_IFACE_GETIFADDRS: OK'                       >> ${ANSTXT}
-	${ECHO} 'Checking for HAVE_IFACE_IFCONF: OK'                           >> ${ANSTXT}
-	${ECHO} 'Checking for HAVE_IFACE_IFREQ: OK'                            >> ${ANSTXT}
-	${ECHO} 'Checking getconf LFS_CFLAGS: OK'                              >> ${ANSTXT}
-	${ECHO} 'Checking for large file support without additional flags: OK' >> ${ANSTXT}
-	${ECHO} 'Checking for working strptime: OK'                            >> ${ANSTXT}
-	${ECHO} 'Checking for HAVE_SHARED_MMAP: OK'                            >> ${ANSTXT}
-	${ECHO} 'Checking for HAVE_MREMAP: OK'                                 >> ${ANSTXT}
-	${ECHO} 'Checking for HAVE_INCOHERENT_MMAP: OK'                        >> ${ANSTXT}
-	${ECHO} 'Checking getconf large file support flags work: OK'           >> ${ANSTXT}
+# Build talloc
 
-${PROOT_TERMUX_FIX_DIFF}:
-	${ECHO} 'diff --git a/src/GNUmakefile b/src/GNUmakefile'			>  ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} 'index b74b3a3..468c000 100644' 							>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '--- a/src/GNUmakefile'										>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '+++ b/src/GNUmakefile'										>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '@@ -63,8 +63,13 @@ endef'									>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' '															>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' $$(eval $$(call define_from_arch.h,,HAS_LOADER_32BIT))'	>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' '											>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '+ifdef X86_32BIT'							>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '+  HAS_LOADER_32BIT ='						>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '+  LOADER_FLAGS_X86_32 = -m32'				>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '+endif'									>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' ifdef HAS_LOADER_32BIT'					>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '   OBJECTS += loader/loader-m32-wrapped.o' >> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '+  LOADER_FLAGS_X86_32 ='					>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' endif'									>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' '											>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' .DEFAULT_GOAL = proot'					>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '@@ -163,8 +168,8 @@ LOADER$$1_OBJECTS = loader/loader$$1.o loader/assembly$$1.o'	>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' $$(eval $$(call define_from_arch.h,$$1,LOADER_ARCH_CFLAGS))'	>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' $$(eval $$(call define_from_arch.h,$$1,LOADER_ADDRESS))'		>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' '																>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '-LOADER_CFLAGS$$1  += -fPIC -ffreestanding $$(LOADER_ARCH_CFLAGS$$1)'										>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '-LOADER_LDFLAGS$$1 += -static -nostdlib -Wl$$(BUILD_ID_NONE),-Ttext=$$(LOADER_ADDRESS$$1),-z,noexecstack' 	>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '+LOADER_CFLAGS$$1  += $$(LOADER_FLAGS_X86_32) -fPIC -ffreestanding $$(LOADER_ARCH_CFLAGS$$1)'				>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} '+LOADER_LDFLAGS$$1 += $$(LOADER_FLAGS_X86_32) -static -nostdlib -Wl$$(BUILD_ID_NONE),-Ttext=$$(LOADER_ADDRESS$$1),-z,noexecstack'	>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' '											>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' loader/loader$$1.o: loader/loader.c'		>> ${PROOT_TERMUX_FIX_DIFF}
-	${ECHO} ' 	@mkdir -p $$$$(dir $$$$@)'				>> ${PROOT_TERMUX_FIX_DIFF}
-
-make_install_talloc:	${ANSTXT}
+make_install_talloc:
 	${TEST} -e ./talloc-${TALLOC_VERSION}.tar.gz || ${WGET} https://download.samba.org/pub/talloc/talloc-${TALLOC_VERSION}.tar.gz
 	${TEST} -d ./talloc-${TALLOC_VERSION} || ${TAR} -zxvf talloc-${TALLOC_VERSION}.tar.gz
 	(${CD} ./talloc-${TALLOC_VERSION} && \
@@ -172,7 +114,7 @@ make_install_proot:	make_install_talloc
 # Build all and Clean all
 
 clean:
-	${RM} -rf ./talloc-${TALLOC_VERSION} ./proot-${PROOT_COMMIT} ${BUILD_PREFIX} ${PROOT_TERMUX_FIX_DIFF} ${ANSTXT}
+	${RM} -rf ./talloc-${TALLOC_VERSION} ./proot-${PROOT_COMMIT} ${BUILD_PREFIX}
 
 distclean: clean
 	${RM} -rf talloc-${TALLOC_VERSION}.tar.gz proot-${PROOT_COMMIT}.zip

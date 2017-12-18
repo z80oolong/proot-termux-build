@@ -39,7 +39,7 @@
 [PROT]:https://github.com/termux/proot
 [TLOC]:https://download.samba.org/pub/talloc/talloc-2.1.10.tar.gz
 [TMRP]:https://github.com/termux
-[PSRC]:https://github.com/termux/proot/archive/proot-454b0b121f03a662f53844a8865f518757e0a315.zip
+[PSRC]:https://github.com/termux/proot/archive/454b0b121f03a662f53844a8865f518757e0a315.zip
 [ZOOL]:http://zool.jpn.org/
 [ANDR]:https://www.samba.org/~tridge/
 [GPL2]:https://www.gnu.org/licenses/old-licenses/gpl-2.0.html

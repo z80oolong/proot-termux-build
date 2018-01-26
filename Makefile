@@ -15,6 +15,7 @@ PROOT_COMMIT   = 454b0b121f03a662f53844a8865f518757e0a315
 # Architecture
 
 ARCH = arm
+#ARCH = arm-64
 #ARCH = x86-32
 #ARCH = x86-64
 
@@ -50,6 +51,14 @@ ifeq (${ARCH}, arm)
 BUILD_HOST              = arm-linux-gnueabihf
 CFLAGS                  = -mthumb -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 CPPFLAGS                = -mthumb -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
+LDFLAGS                 = -L${BUILD_PREFIX}/lib -L/usr/${BUILD_HOST}/lib
+HAS_LOADER_32BIT_DEFINE = 
+endif
+
+ifeq (${ARCH}, arm-64)
+BUILD_HOST              = aarch64-linux-gnu
+CFLAGS                  = -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
+CPPFLAGS                = -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 LDFLAGS                 = -L${BUILD_PREFIX}/lib -L/usr/${BUILD_HOST}/lib
 HAS_LOADER_32BIT_DEFINE = 
 endif

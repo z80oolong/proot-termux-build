@@ -27,19 +27,48 @@ index b74b3a3..468c000 100644
  
  loader/loader$1.o: loader/loader.c
  	@mkdir -p $$(dir $$@)
+diff --git a/src/arch.h b/src/arch.h
+index b219cd6..8a65aca 100644
+--- a/src/arch.h
++++ b/src/arch.h
+@@ -138,6 +138,26 @@ typedef unsigned char byte_t;
+     #undef SYSCALL_AVOIDER
+     #define SYSCALL_AVOIDER ((word_t) -1)
+ 
++    /* Fix a compile error of proot when using aarch64-linux-gnu-gcc. */
++    /* These define come from glibc/sysdeps/unix/sysv/linux/aarch64/sys/user.h */
++    /* See https://code.woboq.org/userspace/glibc//sysdeps/unix/sysv/linux/aarch64/sys/user.h.html */
++    #ifndef HAVE_USER_REGS_STRUCT
++    struct user_regs_struct {
++	    unsigned long long regs[31];
++	    unsigned long long sp;
++	    unsigned long long pc;
++	    unsigned long long pstate;
++    };
++    #endif /* !HAVE_USER_REGS_STRUCT */
++
++    #ifndef HAVE_USER_FPSIMD_STRUCT
++    struct user_fpsimd_struct {
++	    __uint128_t vregs[32];
++	    unsigned int fpsr;
++	    unsigned int fpcr;
++    };
++    #endif /* !HAVE_USER_FPSIMD_STRUCT */
++
+ #elif defined(ARCH_X86)
+ 
+     #define SYSNUMS_HEADER1 "syscall/sysnums-i386.h"
 diff --git a/src/execve/exit.c b/src/execve/exit.c
-index 475e002..509be72 100644
+index 475e002..49452b9 100644
 --- a/src/execve/exit.c
 +++ b/src/execve/exit.c
-@@ -420,6 +420,23 @@ void translate_execve_exit(Tracee *tracee)
+@@ -420,6 +420,21 @@ void translate_execve_exit(Tracee *tracee)
  		poke_reg(tracee, STATE_FLAGS, 0);
  
  #if defined(ARCH_ARM_EABI) && defined(__thumb__)
-+/*
-+ * Fix a compile error of proot when edc869d -> 58d2161.
-+ * These defines come from /usr/arm-linux-gnueabihf/include/asm/ptrace.h
-+ */
 +
++/* Fix a compile error of proot when edc869d -> 58d2161. */
++/* These defines come from /usr/arm-linux-gnueabihf/include/asm/ptrace.h */
 +#ifndef ARM_cpsr
 +#define ARM_cpsr        uregs[16]
 +#endif /* ARM_cpsr */

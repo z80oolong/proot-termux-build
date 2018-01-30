@@ -57,7 +57,7 @@ endif
 
 ifeq (${ARCH}, arm-64)
 BUILD_HOST              = aarch64-linux-gnu
-CFLAGS                  = -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
+CFLAGS                  = -march=native -mandroid -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 CPPFLAGS                = -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 LDFLAGS                 = -L${BUILD_PREFIX}/lib -L/usr/${BUILD_HOST}/lib
 HAS_LOADER_32BIT_DEFINE = 
@@ -65,7 +65,7 @@ endif
 
 ifeq (${ARCH}, x86-32)
 BUILD_HOST              = x86_64-linux-gnu
-CFLAGS                  = -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
+CFLAGS                  = -mandroid -m32 -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 CPPFLAGS                = -m32 -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 LDFLAGS                 = -m32 -L${BUILD_PREFIX}/lib -L/usr/${BUILD_HOST}/lib
 HAS_LOADER_32BIT_DEFINE = X86_32BIT=1
@@ -73,7 +73,7 @@ endif
 
 ifeq (${ARCH}, x86-64)
 BUILD_HOST              = x86_64-linux-gnu
-CFLAGS                  = -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
+CFLAGS                  = -mandroid -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 CPPFLAGS                = -I${BUILD_PREFIX}/include -I/usr/${BUILD_HOST}/include
 LDFLAGS                 = -L${BUILD_PREFIX}/lib -L/usr/${BUILD_HOST}/lib
 HAS_LOADER_32BIT_DEFINE = HAS_LOADER_32BIT=1
@@ -116,7 +116,7 @@ make_install_proot:	make_install_talloc
 	${TEST} -d ./proot-${PROOT_COMMIT} || (${UNZIP} proot-${PROOT_COMMIT}.zip && ${CD} ./proot-${PROOT_COMMIT} && ${PATCH} -p1 < ../${PROOT_TERMUX_FIX_DIFF})
 	(${CD} ./proot-${PROOT_COMMIT}/src && \
 		${ENV} LC_ALL=C ${MAKE} ${MAKE_OPT} -f ./GNUmakefile ${HAS_LOADER_32BIT_DEFINE} LOADER_ARCH_CFLAGS="" CROSS_COMPILE=${CROSS_COMPILE} CC=${CC} LD=${CC} STRIP=${STRIP} OBJCOPY=${OBJCOPY} OBJDUMP=${OBJDUMP} \
-		  CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -I. ${CPPFLAGS}" CFLAGS="-Wall -Wextra -O2" LDFLAGS="${LDFLAGS} -static -ltalloc -Wl,-z,noexecstack" V=1)
+		  CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -I. ${CPPFLAGS}" CFLAGS="-march=native -mandroid -Wall -Wextra -O2" LDFLAGS="${LDFLAGS} -static -ltalloc -Wl,-z,noexecstack" V=1)
 	(${CD} ./proot-${PROOT_COMMIT}/src && ${STRIP} ./proot)
 	${INSTALL} -v -m 0755 ./proot-${PROOT_COMMIT}/src/proot ./proot.${ARCH}
 

@@ -28,30 +28,32 @@ index b74b3a3..468c000 100644
  loader/loader$1.o: loader/loader.c
  	@mkdir -p $$(dir $$@)
 diff --git a/src/arch.h b/src/arch.h
-index b219cd6..8a65aca 100644
+index b219cd6..5c3ec78 100644
 --- a/src/arch.h
 +++ b/src/arch.h
-@@ -138,6 +138,26 @@ typedef unsigned char byte_t;
+@@ -138,6 +138,28 @@ typedef unsigned char byte_t;
      #undef SYSCALL_AVOIDER
      #define SYSCALL_AVOIDER ((word_t) -1)
  
 +    /* Fix a compile error of proot when using aarch64-linux-gnu-gcc. */
 +    /* These define come from glibc/sysdeps/unix/sysv/linux/aarch64/sys/user.h */
 +    /* See https://code.woboq.org/userspace/glibc//sysdeps/unix/sysv/linux/aarch64/sys/user.h.html */
++    #include <stdint.h>
++
 +    #ifndef HAVE_USER_REGS_STRUCT
 +    struct user_regs_struct {
-+	    unsigned long long regs[31];
-+	    unsigned long long sp;
-+	    unsigned long long pc;
-+	    unsigned long long pstate;
++	    uint64_t regs[31];
++	    uint64_t sp;
++	    uint64_t pc;
++	    uint64_t pstate;
 +    };
 +    #endif /* !HAVE_USER_REGS_STRUCT */
 +
 +    #ifndef HAVE_USER_FPSIMD_STRUCT
 +    struct user_fpsimd_struct {
 +	    __uint128_t vregs[32];
-+	    unsigned int fpsr;
-+	    unsigned int fpcr;
++	    uint32_t fpsr;
++	    uint32_t fpcr;
 +    };
 +    #endif /* !HAVE_USER_FPSIMD_STRUCT */
 +

@@ -119,7 +119,7 @@ class BuildEnvironment
 
   def initialize_path(android_ndk_prefix, cross_compile_prefix)
     @android_ndk_prefix   = (android_ndk_prefix || ::ANDROID_NDK_PREFIX).to_path
-    @cross_compile_prefix = (cross_compile_prefix || "/usr/bin").to_path
+    @cross_compile_prefix = (cross_compile_prefix || "/usr").to_path
     @build_prefix         = (Pathname.pwd/"opt")
     @talloc_prefix        = (@build_prefix/"talloc-#{::TALLOC_VERSION}")
   end
@@ -128,17 +128,17 @@ class BuildEnvironment
     if @android_ndk_arch.nil?
       case @arch
       when "arm"
-        @cflags   = "-mthumb -O2 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I/usr/#{@build_host}/include"
-        @cppflags = "-mthumb -DARG_MAX=131072 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I/usr/#{@build_host}/include"
-        @ldflags  = "-L#{@talloc_prefix}/lib -L#{@cross_compile_prefix}/lib -L/usr/#{@build_host}/lib"
+        @cflags   = "-mthumb -O2 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I#{@cross_compile_prefix}/#{@build_host}/include"
+        @cppflags = "-mthumb -DARG_MAX=131072 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I#{@cross_compile_prefix}/#{@build_host}/include"
+        @ldflags  = "-L#{@talloc_prefix}/lib -L#{@cross_compile_prefix}/lib -L#{@cross_compile_prefix}/#{@build_host}/lib"
       when "arm-64", "x86-64"
-        @cflags   = "-O2 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I/usr/#{@build_host}/include"
-        @cppflags = "-DARG_MAX=131072 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I/usr/#{@build_host}/include"
-        @ldflags  = "-L#{@talloc_prefix}/lib -L#{@cross_compile_prefix}/lib -L/usr/#{@build_host}/lib"
+        @cflags   = "-O2 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I#{@cross_compile_prefix}/#{@build_host}/include"
+        @cppflags = "-DARG_MAX=131072 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I#{@cross_compile_prefix}/#{@build_host}/include"
+        @ldflags  = "-L#{@talloc_prefix}/lib -L#{@cross_compile_prefix}/lib -L#{@cross_compile_prefix}/#{@build_host}/lib"
       when "x86-32"
-        @cflags   = "-O2 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I/usr/#{@build_host}/include"
-        @cppflags = "-DARG_MAX=131072 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I/usr/#{@build_host}/include"
-        @ldflags  = "-m32 -L#{@talloc_prefix}/lib -L#{@cross_compile_prefix}/lib -L/usr/#{@build_host}/lib"
+        @cflags   = "-O2 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I#{@cross_compile_prefix}/#{@build_host}/include"
+        @cppflags = "-DARG_MAX=131072 -I#{@talloc_prefix}/include -I#{@cross_compile_prefix}/include -I#{@cross_compile_prefix}/#{@build_host}/include"
+        @ldflags  = "-m32 -L#{@talloc_prefix}/lib -L#{@cross_compile_prefix}/lib -L#{@cross_compile_prefix}/#{@build_host}/lib"
       end
     else
       case @arch
@@ -161,18 +161,18 @@ class BuildEnvironment
     if @android_ndk_arch.nil? then
       case @arch
       when "x86-32"
-        @cc  = "#{@cross_compile_prefix}/#{@build_host}-gcc -m32"
-        @cpp = "#{@cross_compile_prefix}/#{@build_host}-cpp -m32"
+        @cc  = "#{@cross_compile_prefix}/bin/#{@build_host}-gcc -m32"
+        @cpp = "#{@cross_compile_prefix}/bin/#{@build_host}-cpp -m32"
       else
-        @cc  = "#{@cross_compile_prefix}/#{@build_host}-gcc"
-        @cpp = "#{@cross_compile_prefix}/#{@build_host}-cpp"
+        @cc  = "#{@cross_compile_prefix}/bin/#{@build_host}-gcc"
+        @cpp = "#{@cross_compile_prefix}/bin/#{@build_host}-cpp"
       end
-      @ar      = "#{@cross_compile_prefix}/#{@build_host}-ar"
-      @ranlib  = "#{@cross_compile_prefix}/#{@build_host}-ranlib"
-      @strip   = "#{@cross_compile_prefix}/#{@build_host}-strip"
-      @ld      = "#{@cross_compile_prefix}/#{@build_host}-ld"
-      @objcopy = "#{@cross_compile_prefix}/#{@build_host}-objcopy"
-      @objdump = "#{@cross_compile_prefix}/#{@build_host}-objdump"
+      @ar      = "#{@cross_compile_prefix}/bin/#{@build_host}-ar"
+      @ranlib  = "#{@cross_compile_prefix}/bin/#{@build_host}-ranlib"
+      @strip   = "#{@cross_compile_prefix}/bin/#{@build_host}-strip"
+      @ld      = "#{@cross_compile_prefix}/bin/#{@build_host}-ld"
+      @objcopy = "#{@cross_compile_prefix}/bin/#{@build_host}-objcopy"
+      @objdump = "#{@cross_compile_prefix}/bin/#{@build_host}-objdump"
     else
       toolchain_prefix = "#{@build_prefix}/toolchain-#{@android_ndk_arch}/bin".to_path
       sysroot          = "#{@build_prefix}/toolchain-#{@android_ndk_arch}/sysroot".to_path

@@ -1,6 +1,6 @@
 # LICENSE
 
-## License of Makefile and README.md
+## License of build-proot.rb and README.md
 
 Copyright (C) Z.OOL. ([mailto:zool@zool.jpn.org][ZOOL]) 2017
 

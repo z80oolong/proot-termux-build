@@ -9,8 +9,8 @@ require "fileutils"
 require "pathname"
 require "optparse"
 
-TALLOC_VERSION     = "2.1.10"
-PROOT_COMMIT       = "454b0b121f03a662f53844a8865f518757e0a315"
+TALLOC_VERSION     = "2.1.11"
+PROOT_COMMIT       = "c24fa3a43af2336a93f63fe3fb3eac599f0e3592"
 
 TALLOC_URL         = "https://download.samba.org/pub/talloc/talloc-#{TALLOC_VERSION}.tar.gz"
 PROOT_URL          = "https://github.com/termux/proot/archive/#{PROOT_COMMIT}.zip"
@@ -27,8 +27,8 @@ module ShellExec
   end
 
   def x(*args)
-    result = eval "%x[#{args.join(" ")}]"
-    abort "[Error]: Failed to execute #{args.join(" ")}" unless $?.success?
+    args = args.join(" "); result = eval "%x[#{args}]"
+    abort "[Error]: Failed to execute #{args}" unless $?.success?
     return result.chomp
   end
 end
@@ -44,16 +44,6 @@ class String
     return Pathname.new(x("/usr/bin/which", self))
   end
 end
-
-=begin
-class Array
-  def shell_s
-    cp = dup
-    first = cp.shift
-    cp.map { |arg| arg.gsub " ", "\\ " }.unshift(first).join(" ")
-  end
-end
-=end
 
 class Pathname
   def /(other)

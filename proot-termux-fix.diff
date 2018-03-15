@@ -1,45 +1,43 @@
 diff --git a/src/arch.h b/src/arch.h
-index b219cd6..5c3ec78 100644
+index b219cd6..c96a264 100644
 --- a/src/arch.h
 +++ b/src/arch.h
-@@ -138,6 +138,28 @@ typedef unsigned char byte_t;
+@@ -138,6 +138,26 @@ typedef unsigned char byte_t;
      #undef SYSCALL_AVOIDER
      #define SYSCALL_AVOIDER ((word_t) -1)
  
++    #ifndef __ANDROID__
 +    /* Fix a compile error of proot when using aarch64-linux-gnu-gcc. */
 +    /* These define come from glibc/sysdeps/unix/sysv/linux/aarch64/sys/user.h */
 +    /* See https://code.woboq.org/userspace/glibc//sysdeps/unix/sysv/linux/aarch64/sys/user.h.html */
 +    #include <stdint.h>
 +
-+    #ifndef HAVE_USER_REGS_STRUCT
 +    struct user_regs_struct {
 +	    uint64_t regs[31];
 +	    uint64_t sp;
 +	    uint64_t pc;
 +	    uint64_t pstate;
 +    };
-+    #endif /* !HAVE_USER_REGS_STRUCT */
 +
-+    #ifndef HAVE_USER_FPSIMD_STRUCT
 +    struct user_fpsimd_struct {
 +	    __uint128_t vregs[32];
 +	    uint32_t fpsr;
 +	    uint32_t fpcr;
 +    };
-+    #endif /* !HAVE_USER_FPSIMD_STRUCT */
++    #endif /* __ANDROID__ */
 +
  #elif defined(ARCH_X86)
  
      #define SYSNUMS_HEADER1 "syscall/sysnums-i386.h"
 diff --git a/src/execve/exit.c b/src/execve/exit.c
-index 475e002..49452b9 100644
+index 475e002..a6f8898 100644
 --- a/src/execve/exit.c
 +++ b/src/execve/exit.c
-@@ -420,6 +420,21 @@ void translate_execve_exit(Tracee *tracee)
+@@ -420,6 +420,22 @@ void translate_execve_exit(Tracee *tracee)
  		poke_reg(tracee, STATE_FLAGS, 0);
  
  #if defined(ARCH_ARM_EABI) && defined(__thumb__)
-+
++#ifndef __ANDROID__
 +/* Fix a compile error of proot when edc869d -> 58d2161. */
 +/* These defines come from /usr/arm-linux-gnueabihf/include/asm/ptrace.h */
 +#ifndef ARM_cpsr
@@ -53,6 +51,7 @@ index 475e002..49452b9 100644
 +#ifndef PSR_T_BIT
 +#define PSR_T_BIT       V4_PSR_T_BIT
 +#endif /* PSR_T_BIT */
++#endif /* __ANDROID__ */
 +
  		/* Leave ARM thumb mode */
  		tracee->_regs[CURRENT].ARM_cpsr &= ~PSR_T_BIT;

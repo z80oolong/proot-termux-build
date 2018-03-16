@@ -56,8 +56,8 @@ Debian パッケージによるクロスコンパイル環境に代えて、 And
 なお、 Linuxbrew が導入されている端末に Android NDK のインストールする場合は、 2018 年 3 月現在で ```android-sdk, android-ndk``` の両 Formula が [Caskroom][CASK] に移行しているため、下記のようにしてインストールする必要があります。
 
 ```
-brew install -dv https://raw.githubusercontent.com/Linuxbrew/homebrew-core/a0f7020167cec6ee73c7d99ca89b1bd433ee6536/Formula/android-sdk.rb
-brew install -dv https://raw.githubusercontent.com/Linuxbrew/homebrew-core/b0eae852a26b09e17111caa75b6c8e9d636b9055/Formula/android-ndk.rb
+ $ brew install -dv https://raw.githubusercontent.com/Linuxbrew/homebrew-core/a0f7020167cec6ee73c7d99ca89b1bd433ee6536/Formula/android-sdk.rb
+ $ brew install -dv https://raw.githubusercontent.com/Linuxbrew/homebrew-core/b0eae852a26b09e17111caa75b6c8e9d636b9055/Formula/android-ndk.rb
 ```
 
 そして、下記のようにして、 ```./build-proot.rb``` スクリプトに、オプション ```--android-ndk-preix``` に Android NDK のインストール先のディレクトリを指定して起動すると、前述の通常のクロスコンパイル環境の場合と同様に、自動的に [termux の開発コミュニティの github のリポジトリ群][TMRP]のうち、[コミットが c24fa3a4 のソースコード][PSRC]を取得して proot のビルドを行います。

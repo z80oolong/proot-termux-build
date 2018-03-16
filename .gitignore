@@ -8,3 +8,6 @@ proot-c24fa3a43af2336a93f63fe3fb3eac599f0e3592
 proot-c24fa3a43af2336a93f63fe3fb3eac599f0e3592/*
 opt/
 opt/*
+proot.arm-64
+cross-compile/proot.arm-64
+android-ndk/proot.arm-64

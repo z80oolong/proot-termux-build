@@ -79,12 +79,10 @@ Debian パッケージによるクロスコンパイル環境に代えて、 And
 
 ```
 9d7717e6a337c49a7deec38074a35f043deda43b9d4b8d04b4794a62db6aaeba  ./cross-compile/proot.arm
-d8b666ac9b4a61ea99e6d94cb956c8e699d64de26c5beb08e83bc230eb8e5db2  ./cross-compile/proot.arm-64
 9f1eb8303e07570dcb533f2e84b81f2797fab80706d676b6b861b28074b275c0  ./cross-compile/proot.x86-32
 c4c3f5dcfdaa2a52cb394ee28f95b6af32c6b335b4517c36b56948f7822ce12d  ./cross-compile/proot.x86-64
 
 bc6cce6cea9c8f42d4ae8a543658a6ccdf34428734227aa75a90bb5e5192bf26  ./android-ndk/proot.arm
-d03aab9ceb31eddb8ba83b52f5903b28e828953552b100226e3e0999f6c0d914  ./android-ndk/proot.arm-64
 fd1849106822fa90ae0cc447e744d46a9b88f548f9249618c0384fc1754e133a  ./android-ndk/proot.x86-32
 df0eebca891215362221b41b94aee579be620d0110e98f8e59f69d3e372f69b2  ./android-ndk/proot.x86-64
 ```

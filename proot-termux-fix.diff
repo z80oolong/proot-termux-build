@@ -1,8 +1,31 @@
 diff --git a/src/arch.h b/src/arch.h
-index b219cd6..c96a264 100644
+index b219cd6..a4bbce1 100644
 --- a/src/arch.h
 +++ b/src/arch.h
-@@ -138,6 +138,26 @@ typedef unsigned char byte_t;
+@@ -111,6 +111,22 @@ typedef unsigned char byte_t;
+     #undef SYSCALL_AVOIDER
+     #define SYSCALL_AVOIDER ((word_t) 222)
+ 
++    #if !defined(__ANDROID__) && defined(__thumb__)
++    /* Fix a compile error of proot when edc869d -> 58d2161. */
++    /* These defines come from /usr/arm-linux-gnueabihf/include/asm/ptrace.h */
++    #ifndef ARM_cpsr
++    #define ARM_cpsr        uregs[16]
++    #endif /* ARM_cpsr */
++
++    #ifndef V4_PSR_T_BIT
++    #define V4_PSR_T_BIT    0x00000020      /* >= V4T, but not V7M */
++    #endif /* V4_PSR_T_BIT */
++
++    #ifndef PSR_T_BIT
++    #define PSR_T_BIT       V4_PSR_T_BIT
++    #endif /* PSR_T_BIT */
++    #endif /* !__ANDROID__ && __thumb__ */
++
+ #elif defined(ARCH_ARM64)
+ 
+     #define SYSNUMS_HEADER1 "syscall/sysnums-arm64.h"
+@@ -138,6 +154,26 @@ typedef unsigned char byte_t;
      #undef SYSCALL_AVOIDER
      #define SYSCALL_AVOIDER ((word_t) -1)
  
@@ -29,30 +52,34 @@ index b219cd6..c96a264 100644
  #elif defined(ARCH_X86)
  
      #define SYSNUMS_HEADER1 "syscall/sysnums-i386.h"
-diff --git a/src/execve/exit.c b/src/execve/exit.c
-index 475e002..a6f8898 100644
---- a/src/execve/exit.c
-+++ b/src/execve/exit.c
-@@ -420,6 +420,22 @@ void translate_execve_exit(Tracee *tracee)
- 		poke_reg(tracee, STATE_FLAGS, 0);
+diff --git a/src/extension/link2symlink/link2symlink.c b/src/extension/link2symlink/link2symlink.c
+index 92bb9cf..249928f 100644
+--- a/src/extension/link2symlink/link2symlink.c
++++ b/src/extension/link2symlink/link2symlink.c
+@@ -120,13 +120,24 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
  
- #if defined(ARCH_ARM_EABI) && defined(__thumb__)
-+#ifndef __ANDROID__
-+/* Fix a compile error of proot when edc869d -> 58d2161. */
-+/* These defines come from /usr/arm-linux-gnueabihf/include/asm/ptrace.h */
-+#ifndef ARM_cpsr
-+#define ARM_cpsr        uregs[16]
-+#endif /* ARM_cpsr */
+ 		/* Symlink the intermediate to the final file.  */
+ 		status = symlink(final, intermediate);
+-		if (status < 0)
++		if (status < 0) {
++			/* ensure rename final -> original */
++			rename(final, original);
+ 			return status;
++		}
+ 
+ 		/* Symlink the original path to the intermediate one.  */
+ 		status = symlink(intermediate, original);
+-		if (status < 0)
++		if (status < 0) {
++			int status0;
++			/* ensure rename final -> original */
++			rename(final, original);
++			status0 = unlink(intermediate);
++			if (status0 < 0)
++				return status0;
 +
-+#ifndef V4_PSR_T_BIT
-+#define V4_PSR_T_BIT    0x00000020      /* >= V4T, but not V7M */
-+#endif /* V4_PSR_T_BIT */
-+
-+#ifndef PSR_T_BIT
-+#define PSR_T_BIT       V4_PSR_T_BIT
-+#endif /* PSR_T_BIT */
-+#endif /* __ANDROID__ */
-+
- 		/* Leave ARM thumb mode */
- 		tracee->_regs[CURRENT].ARM_cpsr &= ~PSR_T_BIT;
- #endif
+ 			return status;
++		}
+ 	} else {
+ 		/*Move the original content to new location, by incrementing count at end of path. */
+ 		size = my_readlink(intermediate, final);

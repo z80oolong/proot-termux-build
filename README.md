@@ -23,7 +23,7 @@
  $ sudo ln -sf asm-generic asm
 ```
 
-そして、　```./build-proot.rb``` スクリプトを起動すると、自動的に proot に依存する [talloc 2.1.11][TLOC] をダウンロードしてビルドした後、 [termux の開発コミュニティの github のリポジトリ群][TMRP]のうち、[コミットが c24fa3a4 のソースコード][PSRC]を取得して proot のビルドを行います。
+そして、　```./build-proot.rb``` スクリプトを起動すると、自動的に proot に依存する [talloc 2.1.11][TLOC] をダウンロードしてビルドした後、 [termux の開発コミュニティの github のリポジトリ群][TMRP]のうち、[コミットが 3bc068685 のソースコード][PSRC]を取得して proot のビルドを行います。
 
 なお、各アーキテクチャに対応した proot のバイナリを生成する場合は、以下の通りに ```./build-proot.rb``` スクリプトを起動する必要があります。
 
@@ -90,7 +90,7 @@ Debian パッケージによるクロスコンパイル環境に代えて、 And
 [PROT]:https://github.com/termux/proot
 [TLOC]:https://download.samba.org/pub/talloc/talloc-2.1.11.tar.gz
 [TMRP]:https://github.com/termux
-[PSRC]:https://github.com/termux/proot/archive/c24fa3a43af2336a93f63fe3fb3eac599f0e3592.zip
+[PSRC]:https://github.com/termux/proot/archive/proot-3bc06868508b858e9dc290e29815ecd690e9cb0c.zip
 [TANJ]:https://qiita.com/tanjo
 [QTNJ]:https://qiita.com/tanjo/items/0c6549c6700160d5595b
 [CASK]:https://caskroom.github.io/

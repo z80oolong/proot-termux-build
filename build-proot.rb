@@ -296,8 +296,9 @@ class BuildPRootTermux
     end
 
     (Pathname.pwd/"proot-#{::PROOT_COMMIT}").chdir do
-      shell("#{@build.patch}", "-p1", "< #{@build.proot_diff}") if @build.android_ndk_arch.nil?
-    end
+#      shell("#{@build.patch}", "-p1", "< #{@build.proot_diff}") if @build.android_ndk_arch.nil?
+      shell("#{@build.patch}", "-p1", "< #{@build.proot_diff}")
+   end
 
     (Pathname.pwd/"proot-#{::PROOT_COMMIT}/src").chdir do
       args =  ["#{@build.env}", "LC_ALL=C", "#{@build.make}", "#{@build.make_opt}", "-f", "./GNUmakefile"]

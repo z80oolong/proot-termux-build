@@ -10,7 +10,6 @@ require "pathname"
 require "optparse"
 
 TALLOC_VERSION     = "2.1.11"
-#PROOT_COMMIT       = "c24fa3a43af2336a93f63fe3fb3eac599f0e3592"
 PROOT_COMMIT       = "3bc06868508b858e9dc290e29815ecd690e9cb0c"
 
 TALLOC_URL         = "https://download.samba.org/pub/talloc/talloc-#{TALLOC_VERSION}.tar.gz"
@@ -296,9 +295,8 @@ class BuildPRootTermux
     end
 
     (Pathname.pwd/"proot-#{::PROOT_COMMIT}").chdir do
-#      shell("#{@build.patch}", "-p1", "< #{@build.proot_diff}") if @build.android_ndk_arch.nil?
       shell("#{@build.patch}", "-p1", "< #{@build.proot_diff}")
-   end
+    end
 
     (Pathname.pwd/"proot-#{::PROOT_COMMIT}/src").chdir do
       args =  ["#{@build.env}", "LC_ALL=C", "#{@build.make}", "#{@build.make_opt}", "-f", "./GNUmakefile"]

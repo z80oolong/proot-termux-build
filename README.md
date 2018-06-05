@@ -4,7 +4,7 @@
 
 この git リポジトリに置かれている Ruby スクリプトは、 [termux の開発コミュニティ][TERM]によって、システムコール [link(2)][LINK] を [symlink(2)][SLNK] によってエミュレートする機能が実装された [proot][PROT] をクロスコンパイル環境及び Android NDK toolchain に基づいて自動的にビルドする為の Ruby スクリプトです。
 
-また、 [proot][PROT] 及び [proot][PROT] に依存するライブラリである [talloc][TLOC] のソースコードより自動的にビルドされたバイナリファイルである proot.{arm, arm-64} (ARM 及び ARM64 対応バイナリ) 及び proot.{x86-32,x86-64} (x86-32 及び x86-64 対応バイナリ) を同梱しています。
+なお、このスクリプトによってコンパイルされる [proot][PROT] は、 VFAT 領域等、シンボリックリンクに対応していないファイルシステムの領域において、システムコール [link(2)][LINK] を実行した時に、リンク元のファイルが別名に変更されたままとなる不具合を修正する差分ファイルが適用されています。
 
 ## 使用法
 
@@ -69,31 +69,18 @@ Debian パッケージによるクロスコンパイル環境に代えて、 And
  $ ./build-proot.rb --arch x86-64 --android-ndk-prefix /opt/android-ndk	# (x86-64 対応の proot の場合)
 ```
 
-## 同梱のバイナリファイルについて
+## バイナリファイルの同梱について
+ 
+安定版 v0.5 のリリースより、本 git リポジトリにおいて、コンパイル済のバイナリファイル proot.{arm, x86-32, x86-64} 等の同梱を廃止致します。
 
-以下に、この git リポジトリに同梱している proot.{arm, arm-64} (ARM 及び ARM64 対応バイナリ) 及び proot.{x86-32,x86-64} (x86-32 及び x86-64 対応バイナリ) の SHA256 のハッシュ値を示します。
+今後は、以下の proot-termux-build の安定版の配布ページにおいて、安定版のコンパイル済のバイナリファイル及び、コンパイルに使用したソースコードと差分ファイルを配布します。どうかど了承下さい。
 
-ここで、ディレクトリ ```./cross-compile``` に置かれている ```proot.*``` のバイナリは、通常のクロスコンパイルに基づいてビルドされたものであり、ディレクトリ ```./android-ndk``` に置かれている ```proot.*``` のバイナリは、 Androoid NDK に基づいてビルドされたものです。
-
-なお、 Ruby スクリプト ```build-proot.rb``` と同一のディレクトリに置かれている ```proot.*``` のバイナリは、 Android NDK に基づいてビルドされたものと同様です。
-
-```
-9d7717e6a337c49a7deec38074a35f043deda43b9d4b8d04b4794a62db6aaeba  ./cross-compile/proot.arm
-9f1eb8303e07570dcb533f2e84b81f2797fab80706d676b6b861b28074b275c0  ./cross-compile/proot.x86-32
-c4c3f5dcfdaa2a52cb394ee28f95b6af32c6b335b4517c36b56948f7822ce12d  ./cross-compile/proot.x86-64
-
-bc6cce6cea9c8f42d4ae8a543658a6ccdf34428734227aa75a90bb5e5192bf26  ./android-ndk/proot.arm
-fd1849106822fa90ae0cc447e744d46a9b88f548f9249618c0384fc1754e133a  ./android-ndk/proot.x86-32
-df0eebca891215362221b41b94aee579be620d0110e98f8e59f69d3e372f69b2  ./android-ndk/proot.x86-64
-```
+- proot-termux-build の安定版の配布ページ
+    - [https://github.com/z80oolong/proot-termux-build/releases][RELA]
 
 ## 配布条件
 
 この git リポジトリに置かれている本文書及び Ruby スクリプト ```build-proot.rb``` は、 [Z.OOL. (mailto:zool@zool.jpn.org)][ZOOL] が著作権を有し、別添する ```doc/COPYING.md``` のうち、 "LICENSE of Makefile and README.md" の項に記述されたライセンスの配布条件である [GNU public license version 3][GPL3] に従って配布されるものとします。
-
-但し、この git リポジトリに同梱されている talloc 2.1.11 のソースコードである talloc-2.1.11.tar.gz は [Andrew Tridgell][ANDR] 氏が著作権を有し、別添する ```doc/COPYING.md``` のうち、 "LICENSE of talloc 2.1.11" の項に記述されたライセンスの配布条件である [GNU public license version 3][GPL3] に従って配布されるものとします。
-
-そして、この git リポジトリに同梱されている proot のソースコードである proot-c24fa3a43af2336a93f63fe3fb3eac599f0e3592.zip 及びこれらのソースコードより生成されたバイナリファイルである proot.{arm,x86} は、 STMicroelectronics 社及び termux の開発コミュニティにおいて、別添する doc/COPYING.md のうち、 "LICENSE of PRoot" の項において記述された著作権者が著作権を有し、同項のライセンスの配布条件である [GNU public license version 2][GPL2] に従って配布されるものとします。
 
 <!-- 外部リンク一覧 -->
 
@@ -107,7 +94,6 @@ df0eebca891215362221b41b94aee579be620d0110e98f8e59f69d3e372f69b2  ./android-ndk/
 [TANJ]:https://qiita.com/tanjo
 [QTNJ]:https://qiita.com/tanjo/items/0c6549c6700160d5595b
 [CASK]:https://caskroom.github.io/
+[RELA]:https://github.com/z80oolong/proot-termux-build/releases
 [ZOOL]:http://zool.jpn.org/
-[ANDR]:https://www.samba.org/~tridge/
-[GPL2]:https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 [GPL3]:https://www.gnu.org/licenses/gpl.html

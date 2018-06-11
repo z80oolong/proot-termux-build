@@ -53,10 +53,19 @@ index b219cd6..a4bbce1 100644
  
      #define SYSNUMS_HEADER1 "syscall/sysnums-i386.h"
 diff --git a/src/extension/link2symlink/link2symlink.c b/src/extension/link2symlink/link2symlink.c
-index 92bb9cf..249928f 100644
+index 92bb9cf..6cd74c2 100644
 --- a/src/extension/link2symlink/link2symlink.c
 +++ b/src/extension/link2symlink/link2symlink.c
-@@ -120,13 +120,24 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
+@@ -50,6 +50,8 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
+ 	char new_intermediate[PATH_MAX];
+ 	char final[PATH_MAX];
+ 	char new_final[PATH_MAX];
++	char final_bak[PATH_MAX];
++	char intermediate_bak[PATH_MAX];
+ 	char * name;
+ 	struct stat statl;
+ 	ssize_t size;
+@@ -120,13 +122,24 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
  
  		/* Symlink the intermediate to the final file.  */
  		status = symlink(final, intermediate);
@@ -64,6 +73,7 @@ index 92bb9cf..249928f 100644
 +		if (status < 0) {
 +			/* ensure rename final -> original */
 +			rename(final, original);
++
  			return status;
 +		}
  
@@ -71,15 +81,47 @@ index 92bb9cf..249928f 100644
  		status = symlink(intermediate, original);
 -		if (status < 0)
 +		if (status < 0) {
-+			int status0;
 +			/* ensure rename final -> original */
 +			rename(final, original);
-+			status0 = unlink(intermediate);
-+			if (status0 < 0)
-+				return status0;
++
++			/* ensure unlink intermediate */
++			unlink(intermediate);
 +
  			return status;
 +		}
  	} else {
  		/*Move the original content to new location, by incrementing count at end of path. */
  		size = my_readlink(intermediate, final);
+@@ -142,12 +155,30 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
+ 		status = rename(final, new_final);
+ 		if (status < 0)
+ 			return status;
++		strcpy(final_bak, final);
+ 		strcpy(final, new_final);
++		sprintf(intermediate_bak, "%s.bak", intermediate);
+ 		/* Symlink the intermediate to the final file.  */
+-		status = unlink(intermediate);
+-		if (status < 0)
++		status = rename(intermediate, intermediate_bak);
++		if (status < 0) {
++			/* ensure rename final_bak (original final) -> final */
++			rename(final, final_bak);
++
+ 			return status;
++		}
++
+ 		status = symlink(final, intermediate);
++		if (status < 0) {
++			/* ensure rename intermediate_bak (original intermediate) -> intermediate */
++			rename(intermediate_bak, intermediate);
++
++			/* ensure rename final_bak (original final) -> final */
++			rename(final, final_bak);
++
++			return status;
++		}
++
++		status = unlink(intermediate_bak);
+ 		if (status < 0)
+ 			return status;
+ 	}

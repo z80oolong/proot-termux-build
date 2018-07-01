@@ -4,7 +4,11 @@
 
 この git リポジトリに置かれている Ruby スクリプトは、 [termux の開発コミュニティ][TERM]によって、システムコール [link(2)][LINK] を [symlink(2)][SLNK] によってエミュレートする機能が実装された [proot][PROT] をクロスコンパイル環境及び Android NDK toolchain に基づいて自動的にビルドする為の Ruby スクリプトです。
 
-なお、このスクリプトによってコンパイルされる [proot][PROT] は、 VFAT 領域等、シンボリックリンクに対応していないファイルシステムの領域において、システムコール [link(2)][LINK] を実行した時に、リンク元のファイルが別名に変更されたままとなる不具合を修正する差分ファイルが適用されています。
+なお、このスクリプトによってコンパイルされる [proot][PROT] は、以下の不具合を修正する差分ファイルが適用されています。
+
+- VFAT 領域等、シンボリックリンクに対応していないファイルシステムの領域において、システムコール [link(2)][LINK] を実行した時に、リンク元のファイルが別名に変更されたままとなる不具合。
+- [link(2)][LINK] を [symlink(2)][SLNK] によってエミュレートする機能を使用時に内部で作成される ".l2s." をプレフィックスとするファイル及びシンボリックリンクが外部から直接読み書きが出来るためにこれらのファイルを削除すると、ハードリンクが機能しなくなる不具合。  
+    - なお、内部ファイル ".l2s.*" を proot の子プロセスから不可視化する為の修正については、 [GNURoot の開発コミュニティ][GROT]による [proot][PROT] のソースコードの一部である [Dieter Muller 氏のコード ```hidden_files.c```][SRC1] を参考にしました。
 
 ## 使用法
 
@@ -23,7 +27,7 @@
  $ sudo ln -sf asm-generic asm
 ```
 
-そして、　```./build-proot.rb``` スクリプトを起動すると、自動的に proot に依存する [talloc 2.1.11][TLOC] をダウンロードしてビルドした後、 [termux の開発コミュニティの github のリポジトリ群][TMRP]のうち、[コミットが 3bc068685 のソースコード][PSRC]を取得して proot のビルドを行います。
+そして、　```./build-proot.rb``` スクリプトを起動すると、自動的に proot に依存する [talloc 2.1.11][TLOC] をダウンロードしてビルドした後、 [termux の開発コミュニティの github のリポジトリ群][TMRP]のうち、[コミットが 3bc06868 のソースコード][PSRC]を取得して proot のビルドを行います。
 
 なお、各アーキテクチャに対応した proot のバイナリを生成する場合は、以下の通りに ```./build-proot.rb``` スクリプトを起動する必要があります。
 
@@ -60,7 +64,7 @@ Debian パッケージによるクロスコンパイル環境に代えて、 And
  $ brew install -dv https://raw.githubusercontent.com/Linuxbrew/homebrew-core/b0eae852a26b09e17111caa75b6c8e9d636b9055/Formula/android-ndk.rb
 ```
 
-そして、下記のようにして、 ```./build-proot.rb``` スクリプトに、オプション ```--android-ndk-preix``` に Android NDK のインストール先のディレクトリを指定して起動すると、前述の通常のクロスコンパイル環境の場合と同様に、自動的に [termux の開発コミュニティの github のリポジトリ群][TMRP]のうち、[コミットが c24fa3a4 のソースコード][PSRC]を取得して proot のビルドを行います。
+そして、下記のようにして、 ```./build-proot.rb``` スクリプトに、オプション ```--android-ndk-preix``` に Android NDK のインストール先のディレクトリを指定して起動すると、前述の通常のクロスコンパイル環境の場合と同様に、自動的に [termux の開発コミュニティの github のリポジトリ群][TMRP]のうち、[コミットが 3bc06868 のソースコード][PSRC]を取得して proot のビルドを行います。
 
 ```
  $ ./build-proot.rb --arch arm --android-ndk-prefix /opt/android-ndk	# (ARM    対応の proot の場合。以下、 Android NDK のインストール先を /opt/android-ndk とする)
@@ -80,7 +84,9 @@ Debian パッケージによるクロスコンパイル環境に代えて、 And
 
 ## 配布条件
 
-この git リポジトリに置かれている本文書及び Ruby スクリプト ```build-proot.rb``` は、 [Z.OOL. (mailto:zool@zool.jpn.org)][ZOOL] が著作権を有し、別添する ```doc/COPYING.md``` のうち、 "LICENSE of Makefile and README.md" の項に記述されたライセンスの配布条件である [GNU public license version 3][GPL3] に従って配布されるものとします。
+この git リポジトリに置かれている本文書と talloc ビルド用の設定ファイル ```talloc-cross-answer.txt``` 及び Ruby スクリプト ```build-proot.rb``` は、 [Z.OOL. (mailto:zool@zool.jpn.org)][ZOOL] が著作権を有し、別添する ```doc/COPYING.md``` のうち、 "LICENSE of build-proot.rb, talloc-cross-answer.txt and README.md" の項に記述されたライセンスの配布条件である [GNU public license version 3][GPL3] に従って配布されるものとします。
+
+但し、差分ファイル ```proot-termux-fix.diff``` に関しては、 Dieter Mueller 氏及び [Z.OOL. (mailto:zool@zool.jpn.org)][ZOOL] が著作権を有し、別添する ```doc/COPYING.md``` のうち、 "LICENSE of proot-termux-fix.diff" の項に記述されたライセンスの配布条件である [GNU public license version 3][GPL3] に従って配布されるものとします。
 
 <!-- 外部リンク一覧 -->
 
@@ -88,6 +94,8 @@ Debian パッケージによるクロスコンパイル環境に代えて、 And
 [LINK]:http://man7.org/linux/man-pages/man2/link.2.html
 [SLNK]:http://man7.org/linux/man-pages/man2/symlink.2.html
 [PROT]:https://github.com/termux/proot
+[GROT]:https://github.com/corbinlc/gnuroot
+[SRC1]:https://github.com/corbinlc/GNURootDebian/blob/master/GNURootDebianSource/src/main/build_rootfs/PRoot/src/extension/hidden_files/hidden_files.c
 [TLOC]:https://download.samba.org/pub/talloc/talloc-2.1.11.tar.gz
 [TMRP]:https://github.com/termux
 [PSRC]:https://github.com/termux/proot/archive/proot-3bc06868508b858e9dc290e29815ecd690e9cb0c.zip

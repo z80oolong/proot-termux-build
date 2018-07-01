@@ -53,10 +53,87 @@ index b219cd6..a4bbce1 100644
  
      #define SYSNUMS_HEADER1 "syscall/sysnums-i386.h"
 diff --git a/src/extension/link2symlink/link2symlink.c b/src/extension/link2symlink/link2symlink.c
-index 92bb9cf..6cd74c2 100644
+index 92bb9cf..213fb03 100644
 --- a/src/extension/link2symlink/link2symlink.c
 +++ b/src/extension/link2symlink/link2symlink.c
-@@ -50,6 +50,8 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
+@@ -7,6 +7,15 @@
+ #include <errno.h>     /* E*, */
+ #include <limits.h>    /* PATH_MAX, */
+ 
++/**
++ * Fix to allow getdents to hide files with a given prefix '.l2s'.
++ * 
++ * The URL of original source code is:
++ * https://github.com/corbinlc/GNURootDebian/blob/master/GNURootDebianSource/src/main/build_rootfs/PRoot/src/extension/hidden_files/hidden_files.c
++ * 
++ * hidden_files.c is written by Dieter Mueller on 6/12/2015.
++ */
++
+ #include "extension/extension.h"
+ #include "tracee/tracee.h"
+ #include "tracee/mem.h"
+@@ -15,11 +24,32 @@
+ #include "path/path.h"
+ #include "arch.h"
+ #include "attribute.h"
++#include "syscall/chain.h"	/* from hidden_files.c */
+ 
+ #define PREFIX ".l2s."
+ #define DELETED_SUFFIX " (deleted)"
+ 
+ /**
++ *  Definition of struct linux_dirent and struct linux_dirent64
++ *  from hidden_files.c
++ *  This difinition from hidden_files.c
++ */
++struct linux_dirent {
++    unsigned long d_ino;
++    unsigned long d_off;
++    unsigned short d_reclen;
++    char d_name[];
++};
++
++struct linux_dirent64 {
++    unsigned long long d_ino;
++    long long d_off;
++    unsigned short d_reclen;
++    unsigned char d_type;
++    char d_name[];
++};
++
++/**
+  * Copy the contents of the @symlink into @value (nul terminated).
+  * This function returns -errno if an error occured, otherwise 0.
+  */
+@@ -38,6 +68,27 @@ static int my_readlink(const char symlink[PATH_MAX], char value[PATH_MAX])
+ }
+ 
+ /**
++ * Blind copies the given num of bytes from @src to @dst
++ * from hidden_files.c
++ * This function from hidden_files.c and fixed by Z.OOL. (mailto:zool@zool.jpn.org)
++ */
++static void mybcopy(char *src, char *dst, unsigned int num) {
++    while(num--) {
++		*(dst++) = *(src++);
++	}
++}
++
++/**
++ * Compares the given @prefix with the given string.
++ * If @str has the given @prefix, return 1. Otherwise
++ * return 0
++ * This function from hidden_files.c and fixed by Z.OOL. (mailto:zool@zool.jpn.org)
++ */
++static int hasprefix(const char *prefix, char *str) {
++	return (strncmp((const char *)str, prefix, strlen(prefix)) ? 0 : 1);
++}
++
++/**
+  * Move the path pointed to by @tracee's @sysarg to a new location,
+  * symlink the original path to this new one, make @tracee's @sysarg
+  * point to the new location.  This function returns -errno if an
+@@ -50,6 +101,8 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
  	char new_intermediate[PATH_MAX];
  	char final[PATH_MAX];
  	char new_final[PATH_MAX];
@@ -65,7 +142,7 @@ index 92bb9cf..6cd74c2 100644
  	char * name;
  	struct stat statl;
  	ssize_t size;
-@@ -120,13 +122,24 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
+@@ -120,13 +173,24 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
  
  		/* Symlink the intermediate to the final file.  */
  		status = symlink(final, intermediate);
@@ -92,13 +169,15 @@ index 92bb9cf..6cd74c2 100644
  	} else {
  		/*Move the original content to new location, by incrementing count at end of path. */
  		size = my_readlink(intermediate, final);
-@@ -142,12 +155,30 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
+@@ -142,12 +206,32 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
  		status = rename(final, new_final);
  		if (status < 0)
  			return status;
++
 +		strcpy(final_bak, final);
  		strcpy(final, new_final);
-+		sprintf(intermediate_bak, "%s.bak", intermediate);
++		snprintf(intermediate_bak, (size_t)PATH_MAX, "%s.bak", intermediate);
++
  		/* Symlink the intermediate to the final file.  */
 -		status = unlink(intermediate);
 -		if (status < 0)
@@ -125,3 +204,204 @@ index 92bb9cf..6cd74c2 100644
  		if (status < 0)
  			return status;
  	}
+@@ -171,6 +255,8 @@ static int decrement_link_count(Tracee *tracee, Reg sysarg)
+ 	char intermediate[PATH_MAX];
+ 	char final[PATH_MAX];
+ 	char new_final[PATH_MAX];
++	char final_bak[PATH_MAX];
++	char intermediate_bak[PATH_MAX];
+ 	char * name;
+ 	struct stat statl;
+ 	ssize_t size;
+@@ -222,15 +308,32 @@ static int decrement_link_count(Tracee *tracee, Reg sysarg)
+ 		if (status < 0)
+ 			return status;
+ 
++		strcpy(final_bak, final);
+ 		strcpy(final, new_final);
++		snprintf(intermediate_bak, (size_t)PATH_MAX, "%s.bak", intermediate);
+ 
+ 		/* Symlink the intermediate to the final file.  */
+-		status = unlink(intermediate);
+-		if (status < 0)
++		status = rename(intermediate, intermediate_bak);
++		if (status < 0) {
++			/* ensure final_bak (original final) -> final */
++			rename(final_bak, final);
++
+ 			return status;
++		}
+ 
+ 		status = symlink(final, intermediate);
+-		if (status < 0)
++		if (status < 0) {
++			/* ensure final_bak (original final) -> final */
++			rename(final_bak, final);
++
++			/* ensure intermediate_bak (original intermediate) -> intermediate */
++			rename(intermediate_bak, intermediate);
++
++			return status;
++		}
++
++		status = unlink(intermediate_bak);
++		if(status < 0)
+ 			return status;
+ 	} else {
+ 		/* If it is the last, delete the intermediate and final */
+@@ -416,8 +519,123 @@ static void translated_path(Tracee *tracee, char translated_path[PATH_MAX])
+ }
+ 
+ /**
++ * Hide all files with a given PREFIX so they don't exist to the user
++ * This function from hidden_files.c and fixed by Z.OOL. (mailto:zool@zool.jpn.org)
++ */
++static int handle_getdents(Tracee *tracee)
++{
++    switch (get_sysnum(tracee, ORIGINAL)) {
++    case PR_getdents64:
++    case PR_getdents: {
++        /* get the result of the syscall, which is the number of bytes read by getdents */
++        unsigned int res = peek_reg(tracee, CURRENT, SYSARG_RESULT);
++        if (res <= 0) {
++            return res;
++        }
++
++        /* get the system call arguments */
++        word_t orig_start = peek_reg(tracee, CURRENT, SYSARG_2);
++        unsigned int count = peek_reg(tracee, CURRENT, SYSARG_3);
++        char orig[count];
++
++        char path[PATH_MAX];
++        int status = readlink_proc_pid_fd(tracee->pid, peek_reg(tracee, ORIGINAL, SYSARG_1), path);
++        if (status < 0) {
++           return 0;
++        }
++        if(!belongs_to_guestfs(tracee, path))
++           return 0;
++
++        /* retrieve the data from getdents */
++        status = read_data(tracee, orig, orig_start, res);
++        if (status < 0) {
++            return status;
++        }
++
++        /* allocate a space for the copy of the data we want */
++        char copy[count];
++        /* curr will hold the current struct we're examining */
++        struct linux_dirent64 *curr64;
++        struct linux_dirent *curr32;
++        /* pos keeps track of where in memory the copy is */
++        char *pos = copy;
++        /* ptr keeps track of where in memory the original is */
++        char *ptr = orig;
++        /* nleft keeps track of how many bytes we've saved */
++        unsigned int nleft = 0;
++
++        /* while we're still within the memory allowed */
++        if (get_sysnum(tracee, ORIGINAL) == PR_getdents64) {
++            while (ptr < orig + res) {
++
++                /* get the current struct */
++                curr64 = (struct linux_dirent64 *)ptr;
++
++                /* if the name does not matche a given prefix */
++                if (!hasprefix(PREFIX, curr64->d_name)) {
++
++                    /* copy the information */
++                    mybcopy(ptr, pos, curr64->d_reclen);
++
++                    /* move the pos and nleft */
++                    pos += curr64->d_reclen;
++                    nleft += curr64->d_reclen;
++                }
++                /* move to the next linux_dirent */
++                ptr += curr64->d_reclen;
++            }
++        } else {
++            while (ptr < orig + res) {
++
++                /* get the current struct */
++                curr32 = (struct linux_dirent *)ptr;
++
++                /* if the name does not matche a given prefix */
++                if (!hasprefix(PREFIX, curr32->d_name)) {
++
++                    /* copy the information */
++                    mybcopy(ptr, pos, curr32->d_reclen);
++
++                    /* move the pos and nleft */
++                    pos += curr32->d_reclen;
++                    nleft += curr32->d_reclen;
++                }
++                /* move to the next linux_dirent */
++                ptr += curr32->d_reclen;
++            }
++        }
++        /* If there is nothing left */
++        if (!nleft) {
++            /* call getdents again */
++            if (get_sysnum(tracee, ORIGINAL) == PR_getdents64)
++                register_chained_syscall(tracee, PR_getdents64, peek_reg(tracee, ORIGINAL, SYSARG_1), orig_start, count, 0, 0, 0);
++            else
++                register_chained_syscall(tracee, PR_getdents, peek_reg(tracee, ORIGINAL, SYSARG_1), orig_start, count, 0, 0, 0);
++        }
++        else {
++            /* copy the data back into the register */
++            status = write_data(tracee, orig_start, copy, nleft);
++            if (status < 0) {
++                return status;
++            }
++            /* update the return value to match the data */
++            poke_reg(tracee, SYSARG_RESULT, nleft);
++        }
++
++        /* return successful */
++        return 0;
++    }
++
++    default:
++        return 0;
++    }
++}
++
++/**
+  * Handler for this @extension.  It is triggered each time an @event
+  * occurred.  See ExtensionEvent for the meaning of @data1 and @data2.
++ * This function is fixed to call handle_getdents() and the fix is written
++ * by Z.OOL. (mailto:zool@zool.jpn.org)
+  */
+ int link2symlink_callback(Extension *extension, ExtensionEvent event,
+ 			intptr_t data1, intptr_t data2 UNUSED)
+@@ -442,6 +660,8 @@ int link2symlink_callback(Extension *extension, ExtensionEvent event,
+ 			{ PR_stat64,		FILTER_SYSEXIT },
+ 			{ PR_rename,		FILTER_SYSEXIT },
+ 			{ PR_renameat,		FILTER_SYSEXIT },
++			{ PR_getdents,		FILTER_SYSEXIT },	/* From hidden_files.c */
++			{ PR_getdents64,	FILTER_SYSEXIT },	/* From hidden_files.c */
+ 			FILTERED_SYSNUM_END,
+ 		};
+ 		extension->filtered_sysnums = filtered_sysnums;
+@@ -558,8 +778,20 @@ int link2symlink_callback(Extension *extension, ExtensionEvent event,
+ 		return 0;
+ 	}
+ 
+-	case SYSCALL_EXIT_END: {
+-		return handle_sysexit_end(TRACEE(extension));
++	case SYSCALL_CHAINED_EXIT: {	/* From hidden_files.c */
++		return handle_getdents(TRACEE(extension));
++	}
++
++	case SYSCALL_EXIT_END: {	/* From hidden_files.c */
++		Tracee *tracee = TRACEE(extension);
++
++		switch (get_sysnum(tracee, ORIGINAL)) {
++		case PR_getdents:
++		case PR_getdents64:
++			return handle_getdents(tracee);
++		default:
++			return handle_sysexit_end(tracee);
++		}
+ 	}
+ 
+ 	case TRANSLATED_PATH:

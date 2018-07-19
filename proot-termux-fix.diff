@@ -53,7 +53,7 @@ index b219cd6..a4bbce1 100644
  
      #define SYSNUMS_HEADER1 "syscall/sysnums-i386.h"
 diff --git a/src/extension/link2symlink/link2symlink.c b/src/extension/link2symlink/link2symlink.c
-index 92bb9cf..213fb03 100644
+index 4b063dd..cd158d6 100644
 --- a/src/extension/link2symlink/link2symlink.c
 +++ b/src/extension/link2symlink/link2symlink.c
 @@ -7,6 +7,15 @@
@@ -72,7 +72,7 @@ index 92bb9cf..213fb03 100644
  #include "extension/extension.h"
  #include "tracee/tracee.h"
  #include "tracee/mem.h"
-@@ -15,11 +24,32 @@
+@@ -15,10 +24,31 @@
  #include "path/path.h"
  #include "arch.h"
  #include "attribute.h"
@@ -81,7 +81,7 @@ index 92bb9cf..213fb03 100644
  #define PREFIX ".l2s."
  #define DELETED_SUFFIX " (deleted)"
  
- /**
++/**
 + *  Definition of struct linux_dirent and struct linux_dirent64
 + *  from hidden_files.c
 + *  This difinition from hidden_files.c
@@ -101,14 +101,14 @@ index 92bb9cf..213fb03 100644
 +    char d_name[];
 +};
 +
-+/**
+ /**
   * Copy the contents of the @symlink into @value (nul terminated).
   * This function returns -errno if an error occured, otherwise 0.
-  */
-@@ -38,6 +68,27 @@ static int my_readlink(const char symlink[PATH_MAX], char value[PATH_MAX])
+@@ -37,6 +67,27 @@ static int my_readlink(const char symlink[PATH_MAX], char value[PATH_MAX])
+ 	return 0;
  }
  
- /**
++/**
 + * Blind copies the given num of bytes from @src to @dst
 + * from hidden_files.c
 + * This function from hidden_files.c and fixed by Z.OOL. (mailto:zool@zool.jpn.org)
@@ -129,10 +129,9 @@ index 92bb9cf..213fb03 100644
 +	return (strncmp((const char *)str, prefix, strlen(prefix)) ? 0 : 1);
 +}
 +
-+/**
+ /**
   * Move the path pointed to by @tracee's @sysarg to a new location,
   * symlink the original path to this new one, make @tracee's @sysarg
-  * point to the new location.  This function returns -errno if an
 @@ -50,6 +101,8 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
  	char new_intermediate[PATH_MAX];
  	char final[PATH_MAX];
@@ -249,10 +248,11 @@ index 92bb9cf..213fb03 100644
  			return status;
  	} else {
  		/* If it is the last, delete the intermediate and final */
-@@ -416,8 +519,123 @@ static void translated_path(Tracee *tracee, char translated_path[PATH_MAX])
+@@ -416,9 +519,124 @@ static void translated_path(Tracee *tracee, char translated_path[PATH_MAX])
+ 	return;
  }
  
- /**
++/**
 + * Hide all files with a given PREFIX so they don't exist to the user
 + * This function from hidden_files.c and fixed by Z.OOL. (mailto:zool@zool.jpn.org)
 + */
@@ -365,7 +365,7 @@ index 92bb9cf..213fb03 100644
 +    }
 +}
 +
-+/**
+ /**
   * Handler for this @extension.  It is triggered each time an @event
   * occurred.  See ExtensionEvent for the meaning of @data1 and @data2.
 + * This function is fixed to call handle_getdents() and the fix is written
@@ -373,16 +373,16 @@ index 92bb9cf..213fb03 100644
   */
  int link2symlink_callback(Extension *extension, ExtensionEvent event,
  			intptr_t data1, intptr_t data2 UNUSED)
-@@ -442,6 +660,8 @@ int link2symlink_callback(Extension *extension, ExtensionEvent event,
- 			{ PR_stat64,		FILTER_SYSEXIT },
+@@ -444,6 +662,8 @@ int link2symlink_callback(Extension *extension, ExtensionEvent event,
  			{ PR_rename,		FILTER_SYSEXIT },
  			{ PR_renameat,		FILTER_SYSEXIT },
+ 			{ PR_renameat2,		FILTER_SYSEXIT },
 +			{ PR_getdents,		FILTER_SYSEXIT },	/* From hidden_files.c */
 +			{ PR_getdents64,	FILTER_SYSEXIT },	/* From hidden_files.c */
  			FILTERED_SYSNUM_END,
  		};
  		extension->filtered_sysnums = filtered_sysnums;
-@@ -558,8 +778,20 @@ int link2symlink_callback(Extension *extension, ExtensionEvent event,
+@@ -561,8 +781,20 @@ int link2symlink_callback(Extension *extension, ExtensionEvent event,
  		return 0;
  	}
  

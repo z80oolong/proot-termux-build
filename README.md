@@ -27,7 +27,7 @@
  $ sudo ln -sf asm-generic asm
 ```
 
-そして、　```./build-proot.rb``` スクリプトを起動すると、自動的に proot に依存する [talloc 2.1.11][TLOC] をダウンロードしてビルドした後、 [termux の開発コミュニティの github のリポジトリ群][TMRP]のうち、[コミットが 3bc06868 のソースコード][PSRC]を取得して proot のビルドを行います。
+そして、　```./build-proot.rb``` スクリプトを起動すると、自動的に proot に依存する [talloc 2.1.14][TLOC] をダウンロードしてビルドした後、 [termux の開発コミュニティの github のリポジトリ群][TMRP]のうち、[コミットが 3bc06868 のソースコード][PSRC]を取得して proot のビルドを行います。
 
 なお、各アーキテクチャに対応した proot のバイナリを生成する場合は、以下の通りに ```./build-proot.rb``` スクリプトを起動する必要があります。
 
@@ -96,7 +96,7 @@ Debian パッケージによるクロスコンパイル環境に代えて、 And
 [PROT]:https://github.com/termux/proot
 [GROT]:https://github.com/corbinlc/gnuroot
 [SRC1]:https://github.com/corbinlc/GNURootDebian/blob/master/GNURootDebianSource/src/main/build_rootfs/PRoot/src/extension/hidden_files/hidden_files.c
-[TLOC]:https://download.samba.org/pub/talloc/talloc-2.1.11.tar.gz
+[TLOC]:https://download.samba.org/pub/talloc/talloc-2.1.14.tar.gz
 [TMRP]:https://github.com/termux
 [PSRC]:https://github.com/termux/proot/archive/proot-3bc06868508b858e9dc290e29815ecd690e9cb0c.zip
 [TANJ]:https://qiita.com/tanjo

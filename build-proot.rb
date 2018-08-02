@@ -10,7 +10,6 @@ require "pathname"
 require "optparse"
 
 TALLOC_VERSION     = "2.1.14"
-#PROOT_COMMIT       = "b4afbd31d93ab7050303bdd749a97f65709439eb"
 PROOT_COMMIT       = "4bef8aea6701d4d0ab7b079e64372cedb5c9d808"
 
 TALLOC_URL         = "https://download.samba.org/pub/talloc/talloc-#{TALLOC_VERSION}.tar.gz"

@@ -405,3 +405,50 @@ index 4b063dd..cd158d6 100644
  	}
  
  	case TRANSLATED_PATH:
+diff --git a/src/syscall/rlimit.c b/src/syscall/rlimit.c
+index ac1c4ce..5eeaaba 100644
+--- a/src/syscall/rlimit.c
++++ b/src/syscall/rlimit.c
+@@ -88,7 +88,7 @@ int translate_setrlimit_exit(const Tracee *tracee, bool is_prlimit)
+ 		/* Convert this special value from 32-bit to 64-bit,
+ 		 * if needed.  */
+ 		if (is_32on64_mode(tracee) && tracee_stack_limit == (uint32_t) -1)
+-			tracee_stack_limit = RLIM_INFINITY;
++			tracee_stack_limit = (uint32_t)RLIM_INFINITY;
+ 	}
+ 	if (errno != 0)
+ 		return -errno;
+@@ -112,6 +112,6 @@ int translate_setrlimit_exit(const Tracee *tracee, bool is_prlimit)
+ 		VERBOSE(tracee, 1, "can't set stack limit.");
+ 	return 0; /* Not fatal.  */
+ 
+-	VERBOSE(tracee, 1, "stack soft limit increased to %ld bytes", proot_stack.rlim_cur);
++	VERBOSE(tracee, 1, "stack soft limit increased to %ld bytes", (long int)proot_stack.rlim_cur);
+ 	return 0;
+ }
+diff --git a/src/syscall/socket.c b/src/syscall/socket.c
+index ec74950..6aa291a 100644
+--- a/src/syscall/socket.c
++++ b/src/syscall/socket.c
+@@ -120,7 +120,7 @@ int translate_socketcall_enter(Tracee *tracee, word_t *address, int size)
+ 		if (shorter_host_path == NULL || strlen(shorter_host_path) > sizeof_path)
+ 			return -EINVAL;
+ 
+-		(void) mktemp(shorter_host_path);
++		(void) mkstemp(shorter_host_path);
+ 
+ 		if (strlen(shorter_host_path) > sizeof_path)
+ 			return -EINVAL;
+diff --git a/src/tracee/event.c b/src/tracee/event.c
+index c80b8fc..4db8e06 100644
+--- a/src/tracee/event.c
++++ b/src/tracee/event.c
+@@ -636,7 +636,7 @@ int handle_tracee_event(Tracee *tracee, int tracee_status)
+ 			break;
+ 
+ 		case SIGSYS: {
+-			siginfo_t siginfo = {};
++			siginfo_t siginfo = { .si_signo = 0 };
+ 			ptrace(PTRACE_GETSIGINFO, tracee->pid, NULL, &siginfo);
+ 			if (siginfo.si_code == SYS_SECCOMP) {
+ 				if (tracee->skip_next_seccomp_signal) {

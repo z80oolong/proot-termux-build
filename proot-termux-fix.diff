@@ -52,6 +52,44 @@ index b219cd6..a4bbce1 100644
  #elif defined(ARCH_X86)
  
      #define SYSNUMS_HEADER1 "syscall/sysnums-i386.h"
+diff --git a/src/cli/proot.c b/src/cli/proot.c
+index a943cef..e6ed220 100644
+--- a/src/cli/proot.c
++++ b/src/cli/proot.c
+@@ -221,8 +221,10 @@ static int handle_option_V(Tracee *tracee UNUSED, const Cli *cli, const char *va
+ 	fflush(stdout);
+ 
+ 	size = &_binary_licenses_end - &_binary_licenses_start;
+-	if (size > 0)
+-		write(1, &_binary_licenses_start, size);
++	if (size > 0) {
++		if (write(1, &_binary_licenses_start, size) < 0)
++			return 0;
++	}
+ 
+ 	exit_failure = false;
+ 	return -1;
+diff --git a/src/extension/fake_id0/fake_id0.c b/src/extension/fake_id0/fake_id0.c
+index a8872a7..4696720 100644
+--- a/src/extension/fake_id0/fake_id0.c
++++ b/src/extension/fake_id0/fake_id0.c
+@@ -813,12 +813,14 @@ static int handle_sysexit_end(Tracee *tracee, Config *config)
+ status = translate_path(tracee, path_translated, AT_FDCWD, path, false);
+ 		if (status < 0)
+ 			return status;
+-		realpath(path_translated, path_translated_absolute);
++		if (realpath(path_translated, path_translated_absolute) == NULL)
++			return -errno;
+ 
+ 		status = translate_path(tracee, root_translated, AT_FDCWD, get_root(tracee), false);
+ 		if (status < 0)
+ 			return status;
+-		realpath(root_translated, root_translated_absolute);
++		if (realpath(root_translated, root_translated_absolute) == NULL)
++			return -errno;
+ 
+ 		/* Only "new rootfs == current rootfs" is supported yet.  */
+ 		status = compare_paths(root_translated_absolute, path_translated_absolute);
 diff --git a/src/extension/link2symlink/link2symlink.c b/src/extension/link2symlink/link2symlink.c
 index 4b063dd..cd158d6 100644
 --- a/src/extension/link2symlink/link2symlink.c
@@ -72,7 +110,7 @@ index 4b063dd..cd158d6 100644
  #include "extension/extension.h"
  #include "tracee/tracee.h"
  #include "tracee/mem.h"
-@@ -15,10 +24,31 @@
+@@ -15,11 +24,32 @@
  #include "path/path.h"
  #include "arch.h"
  #include "attribute.h"
@@ -81,7 +119,7 @@ index 4b063dd..cd158d6 100644
  #define PREFIX ".l2s."
  #define DELETED_SUFFIX " (deleted)"
  
-+/**
+ /**
 + *  Definition of struct linux_dirent and struct linux_dirent64
 + *  from hidden_files.c
 + *  This difinition from hidden_files.c
@@ -101,14 +139,14 @@ index 4b063dd..cd158d6 100644
 +    char d_name[];
 +};
 +
- /**
++/**
   * Copy the contents of the @symlink into @value (nul terminated).
   * This function returns -errno if an error occured, otherwise 0.
-@@ -37,6 +67,27 @@ static int my_readlink(const char symlink[PATH_MAX], char value[PATH_MAX])
- 	return 0;
+  */
+@@ -38,6 +68,27 @@ static int my_readlink(const char symlink[PATH_MAX], char value[PATH_MAX])
  }
  
-+/**
+ /**
 + * Blind copies the given num of bytes from @src to @dst
 + * from hidden_files.c
 + * This function from hidden_files.c and fixed by Z.OOL. (mailto:zool@zool.jpn.org)
@@ -129,9 +167,10 @@ index 4b063dd..cd158d6 100644
 +	return (strncmp((const char *)str, prefix, strlen(prefix)) ? 0 : 1);
 +}
 +
- /**
++/**
   * Move the path pointed to by @tracee's @sysarg to a new location,
   * symlink the original path to this new one, make @tracee's @sysarg
+  * point to the new location.  This function returns -errno if an
 @@ -50,6 +101,8 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
  	char new_intermediate[PATH_MAX];
  	char final[PATH_MAX];
@@ -248,11 +287,10 @@ index 4b063dd..cd158d6 100644
  			return status;
  	} else {
  		/* If it is the last, delete the intermediate and final */
-@@ -416,9 +519,124 @@ static void translated_path(Tracee *tracee, char translated_path[PATH_MAX])
- 	return;
+@@ -417,8 +520,123 @@ static void translated_path(Tracee *tracee, char translated_path[PATH_MAX])
  }
  
-+/**
+ /**
 + * Hide all files with a given PREFIX so they don't exist to the user
 + * This function from hidden_files.c and fixed by Z.OOL. (mailto:zool@zool.jpn.org)
 + */
@@ -365,7 +403,7 @@ index 4b063dd..cd158d6 100644
 +    }
 +}
 +
- /**
++/**
   * Handler for this @extension.  It is triggered each time an @event
   * occurred.  See ExtensionEvent for the meaning of @data1 and @data2.
 + * This function is fixed to call handle_getdents() and the fix is written
@@ -459,7 +497,7 @@ index ec74950..6780318 100644
  
  #include "syscall/socket.h"
  #include "tracee/tracee.h"
-@@ -39,12 +43,47 @@
+@@ -39,6 +43,10 @@
  
  #include "compat.h"
  
@@ -470,10 +508,10 @@ index ec74950..6780318 100644
  /* The sockaddr_un structure has exactly the same layout on all
   * architectures.  */
  static const off_t offsetof_path = offsetof(struct sockaddr_un, sun_path);
- extern struct sockaddr_un sockaddr_un__;
+@@ -46,6 +54,37 @@ extern struct sockaddr_un sockaddr_un__;
  static const size_t sizeof_path  = sizeof(sockaddr_un__.sun_path);
  
-+/**
+ /**
 + * This function generates a unique temporary filename from @path.
 + * The last six characters of @path must be XXXXXX and these 
 + * are replaced with a string that makes the filename unique. 
@@ -504,9 +542,10 @@ index ec74950..6780318 100644
 +	}
 +}
 +
- /**
++/**
   * Copy in @sockaddr the struct sockaddr_un stored in the @tracee
   * memory at the given @address.  Also, its pathname is copied to the
+  * null-terminated @path.  Only @size bytes are read from the @tracee
 @@ -120,7 +159,7 @@ int translate_socketcall_enter(Tracee *tracee, word_t *address, int size)
  		if (shorter_host_path == NULL || strlen(shorter_host_path) > sizeof_path)
  			return -EINVAL;

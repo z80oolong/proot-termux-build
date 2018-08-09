@@ -10,7 +10,7 @@
 - [link(2)][LINK] を [symlink(2)][SLNK] によってエミュレートする機能を使用時に内部で作成される ".l2s." をプレフィックスとするファイル及びシンボリックリンクが外部から直接読み書きが出来るためにこれらのファイルを削除すると、ハードリンクが機能しなくなる不具合を修正。  
     - なお、内部ファイル ".l2s.*" を proot の子プロセスから不可視化する為の修正については、 [GNURoot の開発コミュニティ][GROT]による [proot][PROT] のソースコードの一部である [Dieter Muller 氏のコード ```hidden_files.c```][SRC1] を参考にしました。
 - ソースコード ```src/syscall/socket.c``` において、 obsolete である glibc の標準ライブラリ関数 ```mktemp(3)``` に代えて独自の実装による ```mktemp(3)``` 関数である ```proot_mktemp``` 関数を使用するように修正。
-- ソースコード ```src/syscall/rlimit.c``` 及び ```src/tracee/event.c``` において、コンパイル時に警告を出力する問題を修正。
+- ソースコード ```src/cli/proot.c, src/extension/fake_id0/fake_id0.c, src/syscall/exit.c, src/syscall/rlimit.c, src/tracee/event.c``` において、コンパイル時に警告を出力する問題を修正。
 - proot の一時ファイルを置くためのディレクトリのパス名の設定について、環境変数 ```PROOT_TMP_DIR``` の他に、環境変数 ```PROOT_TMPDIR``` を参照するように修正。
 
 ## 使用法

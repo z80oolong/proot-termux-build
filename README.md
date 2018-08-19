@@ -101,7 +101,7 @@ Debian パッケージによるクロスコンパイル環境に代えて、 And
 [SRC1]:https://github.com/corbinlc/GNURootDebian/blob/master/GNURootDebianSource/src/main/build_rootfs/PRoot/src/extension/hidden_files/hidden_files.c
 [TLOC]:https://download.samba.org/pub/talloc/talloc-2.1.14.tar.gz
 [TMRP]:https://github.com/termux
-[PSRC]:https://github.com/termux/proot/archive/proot-3bc06868508b858e9dc290e29815ecd690e9cb0c.zip
+[PSRC]:https://github.com/termux/proot/archive/proot-e0569ad9f64a4eb79117759c73d02251746631a0.zip
 [TANJ]:https://qiita.com/tanjo
 [QTNJ]:https://qiita.com/tanjo/items/0c6549c6700160d5595b
 [CASK]:https://caskroom.github.io/

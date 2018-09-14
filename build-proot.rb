@@ -10,10 +10,11 @@ require "pathname"
 require "optparse"
 
 TALLOC_VERSION     = "2.1.14"
-PROOT_COMMIT       = "e0569ad9f64a4eb79117759c73d02251746631a0"
+PROOT_VERSION       = "master"
+#PROOT_VERSION      = "v5.1.0.10"
 
 TALLOC_URL         = "https://download.samba.org/pub/talloc/talloc-#{TALLOC_VERSION}.tar.gz"
-PROOT_URL          = "https://github.com/termux/proot/archive/#{PROOT_COMMIT}.zip"
+PROOT_URL          = "https://github.com/z80oolong/proot/archive/#{PROOT_VERSION}.zip"
 
 ANDROID_NDK_PREFIX = "/opt/android-ndk"
 ANDROID_NDK_API    = 24
@@ -67,8 +68,7 @@ class BuildEnvironment
   def initialize_build_util
     @env     = "env".which;    @tar     = "tar".which
     @unzip   = "unzip".which;  @wget    = "wget".which
-    @make    = "make".which;   @patch   = "patch".which
-    @install = "install".which
+    @make    = "make".which;   @install = "install".which
   end
 
   def initialize_arch_build_host(arch, android_ndk_prefix)
@@ -179,7 +179,6 @@ class BuildEnvironment
 
   def initialize_misc
     @ans_txt    = (Pathname.pwd/"talloc-cross-answer.txt")
-    @proot_diff = (Pathname.pwd/"proot-termux-fix.diff")
     @make_opt   = "-j4"
   end
 
@@ -194,12 +193,12 @@ class BuildEnvironment
 
   public
 
-  attr_reader :env, :tar, :unzip, :wget, :make, :patch, :install
+  attr_reader :env, :tar, :unzip, :wget, :make, :install
   attr_reader :arch, :android_ndk_arch
   attr_reader :cflags, :cppflags, :ldflags
   attr_reader :cc, :cpp, :ar, :ranlib, :strip, :ld, :objcopy, :objdump
   attr_reader :android_ndk_prefix, :build_prefix, :talloc_prefix
-  attr_reader :ans_txt, :proot_diff, :make_opt
+  attr_reader :ans_txt, :make_opt
 
   def to_s
     result =  %[ENV                = "#{@env}"\n]
@@ -207,7 +206,6 @@ class BuildEnvironment
     result << %[UNZIP              = "#{@unzip}"\n]
     result << %[WGET               = "#{@wget}"\n]
     result << %[MAKE               = "#{@make}"\n]
-    result << %[PATCH              = "#{@patch}"\n]
     result << %[INSTALL            = "#{@install}"\n]
     result << %[ARCH               = "#{@arch}"\n]
     result << %[ANDROID_NDK_ARCH   = "#{@android_ndk_arch}"\n]
@@ -226,7 +224,6 @@ class BuildEnvironment
     result << %[BUILD_PREFIX       = "#{@build_prefix}"\n]
     result << %[TALLOC_PREFIX      = "#{@talloc_prefix}"\n]
     result << %[ANS_TXT            = "#{@ans_txt}"\n]
-    result << %[PROOT_DIFF         = "#{@proot_diff}"\n]
     result << %[MAKER_OPT          = "#{@make_opt}"\n]
     return result
   end
@@ -282,23 +279,18 @@ class BuildPRootTermux
   end
 
   def build_termux_proot
-    if (Pathname.pwd/"proot-#{::PROOT_COMMIT}.zip").file? then
-      puts "[EXISTS]: File #{Pathname.pwd}/proot-#{::PROOT_COMMIT}.zip"
+    if (Pathname.pwd/"proot-#{::PROOT_VERSION}.zip").file? then
+      puts "[EXISTS]: File #{Pathname.pwd}/proot-#{::PROOT_VERSION}.zip"
     else
-      shell("#{@build.wget}", "-O", "#{Pathname.pwd}/proot-#{::PROOT_COMMIT}.zip", ::PROOT_URL)
+      shell("#{@build.wget}", "-O", "#{Pathname.pwd}/proot-#{::PROOT_VERSION}.zip", ::PROOT_URL)
     end
 
-    if (Pathname.pwd/"proot-#{::PROOT_COMMIT}").directory? then
-      puts "[EXISTS]: Directory #{Pathname.pwd}/proot-#{::PROOT_COMMIT}"
+    if (Pathname.pwd/"proot-#{::PROOT_VERSION}").directory? then
+      puts "[EXISTS]: Directory #{Pathname.pwd}/proot-#{::PROOT_VERSION}"
     else
-      shell("#{@build.unzip}", "#{Pathname.pwd}/proot-#{::PROOT_COMMIT}.zip")
+      shell("#{@build.unzip}", "#{Pathname.pwd}/proot-#{::PROOT_VERSION}.zip")
     end
-
-    (Pathname.pwd/"proot-#{::PROOT_COMMIT}").chdir do
-      shell("#{@build.patch}", "-p1", "< #{@build.proot_diff}")
-    end
-
-    (Pathname.pwd/"proot-#{::PROOT_COMMIT}/src").chdir do
+    (Pathname.pwd/"proot-#{::PROOT_VERSION}/src").chdir do
       args =  ["#{@build.env}", "LC_ALL=C", "#{@build.make}", "#{@build.make_opt}", "-f", "./GNUmakefile"]
       args << %[LOADER_ARCH_CFLAGS="#{@build.cflags}"] << %[CC="#{@build.cc}"] << %[LD="#{@build.cc}"]
       args << %[STRIP="#{@build.strip}"] << %[OBJCOPY="#{@build.objcopy}"] << %[OBJDUMP="#{@build.objdump}"]
@@ -312,11 +304,11 @@ class BuildPRootTermux
 
     if @build.android_ndk_arch.nil? then
       (Pathname.pwd/"cross-compile").mkpath
-      shell("#{@build.install}", "-v", "-m", "0755", "#{Pathname.pwd}/proot-#{::PROOT_COMMIT}/src/proot", "#{Pathname.pwd}/cross-compile/proot.#{@build.arch}")
+      shell("#{@build.install}", "-v", "-m", "0755", "#{Pathname.pwd}/proot-#{::PROOT_VERSION}/src/proot", "#{Pathname.pwd}/cross-compile/proot.#{@build.arch}")
     else
       (Pathname.pwd/"android-ndk").mkpath
-      shell("#{@build.install}", "-v", "-m", "0755", "#{Pathname.pwd}/proot-#{::PROOT_COMMIT}/src/proot", "#{Pathname.pwd}/proot.#{@build.arch}")
-      shell("#{@build.install}", "-v", "-m", "0755", "#{Pathname.pwd}/proot-#{::PROOT_COMMIT}/src/proot", "#{Pathname.pwd}/android-ndk/proot.#{@build.arch}")
+      shell("#{@build.install}", "-v", "-m", "0755", "#{Pathname.pwd}/proot-#{::PROOT_VERSION}/src/proot", "#{Pathname.pwd}/proot.#{@build.arch}")
+      shell("#{@build.install}", "-v", "-m", "0755", "#{Pathname.pwd}/proot-#{::PROOT_VERSION}/src/proot", "#{Pathname.pwd}/android-ndk/proot.#{@build.arch}")
     end
   end
 
@@ -324,8 +316,8 @@ class BuildPRootTermux
     puts "[Remove]: Directory #{Pathname.pwd}/talloc-#{::TALLOC_VERSION}"
     (Pathname.pwd/"talloc-#{::TALLOC_VERSION}").rm_rf
 
-    puts "[Remove]: Directory #{Pathname.pwd}/proot-#{::PROOT_COMMIT}"
-    (Pathname.pwd/"proot-#{::PROOT_COMMIT}").rm_rf
+    puts "[Remove]: Directory #{Pathname.pwd}/proot-#{::PROOT_VERSION}"
+    (Pathname.pwd/"proot-#{::PROOT_VERSION}").rm_rf
 
     puts "[Remove]: Directory #{@build.talloc_prefix}"
     @build.talloc_prefix.rm_rf
@@ -339,9 +331,9 @@ class BuildPRootTermux
       (Pathname.pwd/"talloc-#{::TALLOC_VERSION}.tar.gz").delete
     end
 
-    puts "[Remove]: File #{Pathname.pwd}/proot-#{::PROOT_COMMIT}.zip"
-    if (Pathname.pwd/"proot-#{::PROOT_COMMIT}.zip").file? then
-      (Pathname.pwd/"proot-#{::PROOT_COMMIT}.zip").delete
+    puts "[Remove]: File #{Pathname.pwd}/proot-#{::PROOT_VERSION}.zip"
+    if (Pathname.pwd/"proot-#{::PROOT_VERSION}.zip").file? then
+      (Pathname.pwd/"proot-#{::PROOT_VERSION}.zip").delete
     end
 
     ["arm", "arm64", "x86", "x86_64"].each do |arch|

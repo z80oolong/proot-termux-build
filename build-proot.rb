@@ -2,7 +2,7 @@
 #
 # Copyright (C) Z.OOL. <zool@zool.jpn.org> 2017
 #
-# This file is distriduted under the GNU Lesser General Public License v3.
+# This file is distriduted under the GNU General Public License v3.
 # See doc/COPYING.md for more details.
 
 require "fileutils"
@@ -11,7 +11,7 @@ require "optparse"
 
 TALLOC_VERSION     = "2.1.14"
 PROOT_VERSION       = "master"
-#PROOT_VERSION      = "v5.1.0.10"
+#PROOT_VERSION      = "v5.1.0.109"
 
 TALLOC_URL         = "https://download.samba.org/pub/talloc/talloc-#{TALLOC_VERSION}.tar.gz"
 PROOT_URL          = "https://github.com/z80oolong/proot/archive/#{PROOT_VERSION}.zip"

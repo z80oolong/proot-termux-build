@@ -1,9 +1,9 @@
-talloc-2.1.14.tar.gz
-talloc-2.1.14/
-talloc-2.1.14/*
-proot-master
-proot-master.zip
-proot-master/*
+talloc-*.tar.gz
+talloc-*/
+talloc-*/*
+proot-*
+proot-*.zip
+proot-*/*
 opt/
 opt/*
 proot.*

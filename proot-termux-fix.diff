@@ -1,5 +1,61 @@
+diff --git a/README.md b/README.md
+index 17f9658..230c2c5 100644
+--- a/README.md
++++ b/README.md
+@@ -1,5 +1,51 @@
++# proot -- Termux の開発コミュニティによる proot の Debian noroot 環境向け修正版
++
++## 概要
++
++この git リポジトリに置かれている [proot][PROT] のソースコードは、 [termux の開発コミュニティ][TERM]による [proot][PROT] のソースコードを、 [Debian noroot 環境][DBNR]上で動作させるように修正したものです。
++
++なお、この git リポジトリに置かれている [proot][PROT] のソースコードをビルドするには、[termux の開発コミュニティによる proot をビルドするための Ruby スクリプト][BLPR]に同梱されている ```build-proot.rb``` を使用して、ビルドを行って下さい。
++
++## Termux の開発コミュニティによる proot のソースコードからの修正点
++
++この git リポジトリに置かれている [proot][PROT] のソースコードは、オリジナルとなる [termux の開発コミュニティ][TERM]による [proot][PROT] のソースコードから、以下の不具合等が修正されています。
++
++- Android NDK の toolchain の他、 PC 上のクロスコンパイル環境においてもビルドが可能となるように修正。
++- VFAT 領域等、シンボリックリンクに対応していないファイルシステムの領域において、システムコール [link(2)][LINK] を実行した時に、リンク元のファイルが別名に変更されたままとなる問題を修正。
++- [proot][PROT] コマンドにおいて、オプション ```--link2symlink``` が指定され、かつ、環境変数 ```PROOT_L2S_DIR``` が設定されない場合に、自動的にオプション ```-H``` が指定されて [proot][PROT] コマンドが起動されるように修正。
++    - また、オプション ```-H``` が設定された場合に、 [proot][PROT] によって不可視化されるファイル及びシンボリックリンクのプレフィックスを ".l2s." とするように修正。
++    - [link(2)][LINK] を [symlink(2)][SLNK] によってエミュレートする機能を使用時に [proot][PROT] の内部で作成される ".l2s." をプレフィックスとするファイル及びシンボリックリンクが外部から直接読み書きが出来るためにこれらのファイルを削除すると、ハードリンクが機能しなくなるために行われる修正です。
++- ソースコード ```src/syscall/socket.c``` において、 obsolete である glibc の標準ライブラリ関数 ```mktemp(3)``` に代えて独自の実装による ```mktemp(3)``` 関数である ```proot_mktemp``` 関数を使用するように修正。
++- ソースコード ```src/cli/proot.c, src/syscall/rlimit.c, src/tracee/mem.c``` 等において、コンパイル時に警告を出力する問題を修正。
++- proot の一時ファイルを置くためのディレクトリのパス名の設定について、環境変数 ```PROOT_TMP_DIR``` の他に、環境変数 ```PROOT_TMPDIR``` を参照するように修正。
++
++## 配布条件
++
++この git リポジトリに置かれている [proot][PROT] のソースコードは、 [termux の開発コミュニティ][TERM]による [proot][PROT] のソースコードを、 [Z.OOL. (mailto:zool@zool.jpn.org)][ZOOL] によって、 [Debian noroot 環境][DBNR]及び PC 上のクロスコンパイル環境においてビルド及び動作するよう修正したものです。
++
++従って、この [proot][PROT] のソースコードは、この git リポジトリに同梱されている [COPYING][COPY] の冒頭に記述されている STMicroelectronics 社の [proot][PROT] の開発者の各氏と [termux の開発コミュニティの各氏][TERM]及び [Z.OOL. (mailto:zool@zool.jpn.org)][ZOOL] が著作権を有し、オリジナルとなる [proot][PROT] のソースコードと同様に、 [GNU public license version 2][GPL2] に従って配布されるものとします。
++
++## 追記
++
++以下に、オリジナルの [proot][PROT] のソースコードの [README.md][READ] の原文を示します。
++
++----
+ proot
+ =====
+ [![Travis build status](https://travis-ci.org/termux/proot.svg?branch=master)](https://travis-ci.org/termux/proot)
+ 
+ This is a copy of [the PRoot project](https://github.com/proot-me/PRoot/) with patches applied to work better under [Termux](https://termux.com).
++
++<!-- 外部リンク一覧 -->
++
++[TERM]:https://termux.com/
++[DBNR]:https://play.google.com/store/apps/details?id=com.cuntubuntu&hl=ja
++[BLPR]:https://github.com/z80oolong/proot-termux-build
++[LINK]:http://man7.org/linux/man-pages/man2/link.2.html
++[SLNK]:http://man7.org/linux/man-pages/man2/symlink.2.html
++[PROT]:https://github.com/termux/proot
++[TMRP]:https://github.com/termux
++[ZOOL]:http://zool.jpn.org/
++[COPY]:https://github.com/z80oolong/proot/blob/master/COPYING
++[GPL2]:https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
++[READ]:https://github.com/termux/proot/blob/master/README.md
 diff --git a/src/arch.h b/src/arch.h
-index b219cd6..a4bbce1 100644
+index f554338..272bcbe 100644
 --- a/src/arch.h
 +++ b/src/arch.h
 @@ -111,6 +111,22 @@ typedef unsigned char byte_t;
@@ -25,7 +81,7 @@ index b219cd6..a4bbce1 100644
  #elif defined(ARCH_ARM64)
  
      #define SYSNUMS_HEADER1 "syscall/sysnums-arm64.h"
-@@ -138,6 +154,26 @@ typedef unsigned char byte_t;
+@@ -139,6 +155,35 @@ typedef unsigned char byte_t;
      #undef SYSCALL_AVOIDER
      #define SYSCALL_AVOIDER ((word_t) -1)
  
@@ -49,11 +105,42 @@ index b219cd6..a4bbce1 100644
 +    };
 +    #endif /* __ANDROID__ */
 +
++    /* This define come from /usr/src/include/uapi/linux/ptrace.h */
++    /* See https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/ptrace.h */
++    #ifndef PTRACE_GETSIGMASK
++    #define PTRACE_GETSIGMASK	0x420a
++    #endif
++    #ifndef PTRACE_SETSIGMASK
++    #define PTRACE_SETSIGMASK	0x420b
++    #endif
++
  #elif defined(ARCH_X86)
  
      #define SYSNUMS_HEADER1 "syscall/sysnums-i386.h"
+diff --git a/src/cli/cli.c b/src/cli/cli.c
+index c523f2e..e3949ee 100644
+--- a/src/cli/cli.c
++++ b/src/cli/cli.c
+@@ -557,10 +557,17 @@ const char *expand_front_variable(TALLOC_CTX *context, const char *string)
+ 
+ static int indent_level = 0;
+ 
++#ifdef __ANDROID__
++void __cyg_profile_func_enter(void *this_function UNUSED, void *call_site UNUSED) DONT_INSTRUMENT;
++void __cyg_profile_func_enter(void *this_function UNUSED, void *call_site UNUSED)
++#else
+ void __cyg_profile_func_enter(void *this_function, void *call_site) DONT_INSTRUMENT;
+ void __cyg_profile_func_enter(void *this_function, void *call_site)
++#endif
+ {
++#ifndef __ANDROID__
+ 	void *const pointers[] = { this_function, call_site };
++#endif
+ 	char **symbols = NULL;
+ 
+ #ifndef __ANDROID__
 diff --git a/src/cli/proot.c b/src/cli/proot.c
-index a943cef..5d51670 100644
+index 6a37c79..1f29a44 100644
 --- a/src/cli/proot.c
 +++ b/src/cli/proot.c
 @@ -221,8 +221,10 @@ static int handle_option_V(Tracee *tracee UNUSED, const Cli *cli, const char *va
@@ -69,126 +156,135 @@ index a943cef..5d51670 100644
  
  	exit_failure = false;
  	return -1;
+@@ -283,12 +285,20 @@ static int handle_option_S(Tracee *tracee, const Cli *cli, const char *value)
+ static int handle_option_link2symlink(Tracee *tracee, const Cli *cli UNUSED, const char *value UNUSED)
+ {
+ 	int status;
++	char *l2s_directory;
+ 
+ 	/* Initialize the link2symlink extension.  */
+ 	status = initialize_extension(tracee, link2symlink_callback, NULL);
+ 	if (status < 0)
+ 		note(tracee, WARNING, INTERNAL, "link2symlink not initialized");
+ 
++	/* If environment variable PROOT_L2S_DIR is not set, the option "-H" is forced to be set. */
++	l2s_directory = getenv("PROOT_L2S_DIR");
++	if (l2s_directory == NULL || l2s_directory[0] == '\0') {
++		if(handle_option_H(tracee, cli, value) < 0) { /* noop */
++		}
++	}
++
+ 	return 0;
+ }
+ 
+diff --git a/src/cli/proot.h b/src/cli/proot.h
+index 31ce9ac..bccaafb 100644
+--- a/src/cli/proot.h
++++ b/src/cli/proot.h
+@@ -245,7 +245,12 @@ Copyright (C) 2015 STMicroelectronics, licensed under GPL v2 or later.",
+                 { .name = "-H", .separator = '\0', .value = NULL },
+                 { .name = NULL, .separator = '\0', .value = NULL } },
+           .handler = handle_option_H,
++#ifdef USERLAND
+           .description = "Hide files and directories starting with '.proot.' .",
++#endif
++#ifndef USERLAND
++          .description = "Hide files and directories starting with '.l2s.' . (If environment variable 'PROOT_L2S_DIR' is not set, this option is forced to be set.)",
++#endif
+           .detail = "",
+         },
+         { .class = "Extension options",
+diff --git a/src/extension/fake_id0/chroot.c b/src/extension/fake_id0/chroot.c
+index 757a602..1876d13 100644
+--- a/src/extension/fake_id0/chroot.c
++++ b/src/extension/fake_id0/chroot.c
+@@ -32,12 +32,14 @@ int handle_chroot_exit_end(Tracee *tracee, Config *config) {
+ 	status = translate_path(tracee, path_translated, AT_FDCWD, path, false);
+ 	if (status < 0)
+ 		return status;
+-	realpath(path_translated, path_translated_absolute);
++	if (realpath(path_translated, path_translated_absolute) == (char *)NULL) { /* noop */
++	}
+ 
+ 	status = translate_path(tracee, root_translated, AT_FDCWD, get_root(tracee), false);
+ 	if (status < 0)
+ 		return status;
+-	realpath(root_translated, root_translated_absolute);
++	if (realpath(root_translated, root_translated_absolute) == (char *)NULL) { /* noop */
++	}
+ 
+ 	/* Only "new rootfs == current rootfs" is supported yet.  */
+ 	status = compare_paths(root_translated_absolute, path_translated_absolute);
 diff --git a/src/extension/fake_id0/fake_id0.c b/src/extension/fake_id0/fake_id0.c
-index a8872a7..2c16ab3 100644
+index 0e248e3..886c483 100644
 --- a/src/extension/fake_id0/fake_id0.c
 +++ b/src/extension/fake_id0/fake_id0.c
-@@ -238,7 +238,7 @@ static int fix_sendmsg(Tracee *tracee, bool is_socketcall)
+@@ -1082,6 +1082,7 @@ int fake_id0_callback(Extension *extension, ExtensionEvent event, intptr_t data1
+ 			uid = getuid();
+ 
+ 		gid_string = strchr(uid_string, ':');
++		gid = 0;
+ 		if (gid_string == NULL) {
+ 			errno = EINVAL;
+ 		}
+diff --git a/src/extension/fake_id0/helper_functions.c b/src/extension/fake_id0/helper_functions.c
+index 3a16ce5..48c4e97 100644
+--- a/src/extension/fake_id0/helper_functions.c
++++ b/src/extension/fake_id0/helper_functions.c
+@@ -319,7 +319,8 @@ int read_meta_file(char path[PATH_MAX], mode_t *mode, uid_t *owner, gid_t *group
+ 		return 0;
+ 
+ 	}
+-	fscanf(fp, "%d %d %d ", &lcl_mode, owner, group);
++	if (fscanf(fp, "%d %d %d ", &lcl_mode, owner, group) == EOF) { /* noop */
++	}
+ 	lcl_mode = otod(lcl_mode);
+ 	*mode = (mode_t)lcl_mode;
+ 	fclose(fp);
+diff --git a/src/extension/fake_id0/sendmsg.c b/src/extension/fake_id0/sendmsg.c
+index 228fcdc..ea3cb8d 100644
+--- a/src/extension/fake_id0/sendmsg.c
++++ b/src/extension/fake_id0/sendmsg.c
+@@ -13,7 +13,7 @@ int handle_sendmsg_enter_end(Tracee *tracee, word_t sysnum)
  	/* Read sendmsg header.  */
  	int status;
  	unsigned long socketcall_args[3];
 -	struct msghdr msg = {};
 +	struct msghdr msg = { .msg_name = (void *)NULL };
+ 	bool is_socketcall = sysnum == PR_socketcall;
+ 
  	if (!is_socketcall)
- 	{
- 		status = read_data(tracee, &msg, peek_reg(tracee, CURRENT, SYSARG_2), sizeof(struct msghdr));
-@@ -813,12 +813,14 @@ static int handle_sysexit_end(Tracee *tracee, Config *config)
- status = translate_path(tracee, path_translated, AT_FDCWD, path, false);
- 		if (status < 0)
- 			return status;
--		realpath(path_translated, path_translated_absolute);
-+		if (realpath(path_translated, path_translated_absolute) == NULL) {	/* noop */
-+		}
+diff --git a/src/extension/hidden_files/hidden_files.c b/src/extension/hidden_files/hidden_files.c
+index 54e4abc..a27a42b 100644
+--- a/src/extension/hidden_files/hidden_files.c
++++ b/src/extension/hidden_files/hidden_files.c
+@@ -13,7 +13,12 @@
+ #include "path/path.h"
  
- 		status = translate_path(tracee, root_translated, AT_FDCWD, get_root(tracee), false);
- 		if (status < 0)
- 			return status;
--		realpath(root_translated, root_translated_absolute);
-+		if (realpath(root_translated, root_translated_absolute) == NULL) { /* noop */
-+		}
+ /* Change the HIDDEN_PREFIX to change which files are hidden */
++#ifdef USERLAND
+ #define HIDDEN_PREFIX ".proot"
++#endif 
++#ifndef USERLAND
++#define HIDDEN_PREFIX ".l2s."
++#endif 
  
- 		/* Only "new rootfs == current rootfs" is supported yet.  */
- 		status = compare_paths(root_translated_absolute, path_translated_absolute);
+ struct linux_dirent {
+     unsigned long d_ino;
 diff --git a/src/extension/link2symlink/link2symlink.c b/src/extension/link2symlink/link2symlink.c
-index 4b063dd..cd158d6 100644
+index 3b63382..511cc22 100644
 --- a/src/extension/link2symlink/link2symlink.c
 +++ b/src/extension/link2symlink/link2symlink.c
-@@ -7,6 +7,15 @@
- #include <errno.h>     /* E*, */
- #include <limits.h>    /* PATH_MAX, */
- 
-+/**
-+ * Fix to allow getdents to hide files with a given prefix '.l2s'.
-+ * 
-+ * The URL of original source code is:
-+ * https://github.com/corbinlc/GNURootDebian/blob/master/GNURootDebianSource/src/main/build_rootfs/PRoot/src/extension/hidden_files/hidden_files.c
-+ * 
-+ * hidden_files.c is written by Dieter Mueller on 6/12/2015.
-+ */
-+
- #include "extension/extension.h"
- #include "tracee/tracee.h"
- #include "tracee/mem.h"
-@@ -15,10 +24,31 @@
- #include "path/path.h"
- #include "arch.h"
- #include "attribute.h"
-+#include "syscall/chain.h"	/* from hidden_files.c */
- 
- #define PREFIX ".l2s."
- #define DELETED_SUFFIX " (deleted)"
- 
-+/**
-+ *  Definition of struct linux_dirent and struct linux_dirent64
-+ *  from hidden_files.c
-+ *  This difinition from hidden_files.c
-+ */
-+struct linux_dirent {
-+    unsigned long d_ino;
-+    unsigned long d_off;
-+    unsigned short d_reclen;
-+    char d_name[];
-+};
-+
-+struct linux_dirent64 {
-+    unsigned long long d_ino;
-+    long long d_off;
-+    unsigned short d_reclen;
-+    unsigned char d_type;
-+    char d_name[];
-+};
-+
- /**
-  * Copy the contents of the @symlink into @value (nul terminated).
-  * This function returns -errno if an error occured, otherwise 0.
-@@ -37,6 +67,27 @@ static int my_readlink(const char symlink[PATH_MAX], char value[PATH_MAX])
- 	return 0;
- }
- 
-+/**
-+ * Blind copies the given num of bytes from @src to @dst
-+ * from hidden_files.c
-+ * This function from hidden_files.c and fixed by Z.OOL. (mailto:zool@zool.jpn.org)
-+ */
-+static void mybcopy(char *src, char *dst, unsigned int num) {
-+    while(num--) {
-+		*(dst++) = *(src++);
-+	}
-+}
-+
-+/**
-+ * Compares the given @prefix with the given string.
-+ * If @str has the given @prefix, return 1. Otherwise
-+ * return 0
-+ * This function from hidden_files.c and fixed by Z.OOL. (mailto:zool@zool.jpn.org)
-+ */
-+static int hasprefix(const char *prefix, char *str) {
-+	return (strncmp((const char *)str, prefix, strlen(prefix)) ? 0 : 1);
-+}
-+
- /**
-  * Move the path pointed to by @tracee's @sysarg to a new location,
-  * symlink the original path to this new one, make @tracee's @sysarg
-@@ -50,6 +101,8 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
+@@ -56,6 +56,8 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
  	char new_intermediate[PATH_MAX];
  	char final[PATH_MAX];
  	char new_final[PATH_MAX];
 +	char final_bak[PATH_MAX];
 +	char intermediate_bak[PATH_MAX];
  	char * name;
+ 	const char * l2s_directory;
  	struct stat statl;
- 	ssize_t size;
-@@ -120,13 +173,24 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
+@@ -141,13 +143,24 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
  
  		/* Symlink the intermediate to the final file.  */
  		status = symlink(final, intermediate);
@@ -215,8 +311,8 @@ index 4b063dd..cd158d6 100644
  	} else {
  		/*Move the original content to new location, by incrementing count at end of path. */
  		size = my_readlink(intermediate, final);
-@@ -142,12 +206,32 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
- 		status = rename(final, new_final);
+@@ -166,12 +179,32 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg)
+ 		status = notify_extensions(tracee, LINK2SYMLINK_RENAME, (intptr_t) final, (intptr_t) new_final);
  		if (status < 0)
  			return status;
 +
@@ -250,7 +346,7 @@ index 4b063dd..cd158d6 100644
  		if (status < 0)
  			return status;
  	}
-@@ -171,6 +255,8 @@ static int decrement_link_count(Tracee *tracee, Reg sysarg)
+@@ -195,6 +228,8 @@ static int decrement_link_count(Tracee *tracee, Reg sysarg)
  	char intermediate[PATH_MAX];
  	char final[PATH_MAX];
  	char new_final[PATH_MAX];
@@ -259,7 +355,7 @@ index 4b063dd..cd158d6 100644
  	char * name;
  	struct stat statl;
  	ssize_t size;
-@@ -222,15 +308,32 @@ static int decrement_link_count(Tracee *tracee, Reg sysarg)
+@@ -254,15 +289,32 @@ static int decrement_link_count(Tracee *tracee, Reg sysarg)
  		if (status < 0)
  			return status;
  
@@ -295,173 +391,15 @@ index 4b063dd..cd158d6 100644
  			return status;
  	} else {
  		/* If it is the last, delete the intermediate and final */
-@@ -416,9 +519,124 @@ static void translated_path(Tracee *tracee, char translated_path[PATH_MAX])
- 	return;
- }
- 
-+/**
-+ * Hide all files with a given PREFIX so they don't exist to the user
-+ * This function from hidden_files.c and fixed by Z.OOL. (mailto:zool@zool.jpn.org)
-+ */
-+static int handle_getdents(Tracee *tracee)
-+{
-+    switch (get_sysnum(tracee, ORIGINAL)) {
-+    case PR_getdents64:
-+    case PR_getdents: {
-+        /* get the result of the syscall, which is the number of bytes read by getdents */
-+        unsigned int res = peek_reg(tracee, CURRENT, SYSARG_RESULT);
-+        if (res <= 0) {
-+            return res;
-+        }
-+
-+        /* get the system call arguments */
-+        word_t orig_start = peek_reg(tracee, CURRENT, SYSARG_2);
-+        unsigned int count = peek_reg(tracee, CURRENT, SYSARG_3);
-+        char orig[count];
-+
-+        char path[PATH_MAX];
-+        int status = readlink_proc_pid_fd(tracee->pid, peek_reg(tracee, ORIGINAL, SYSARG_1), path);
-+        if (status < 0) {
-+           return 0;
-+        }
-+        if(!belongs_to_guestfs(tracee, path))
-+           return 0;
-+
-+        /* retrieve the data from getdents */
-+        status = read_data(tracee, orig, orig_start, res);
-+        if (status < 0) {
-+            return status;
-+        }
-+
-+        /* allocate a space for the copy of the data we want */
-+        char copy[count];
-+        /* curr will hold the current struct we're examining */
-+        struct linux_dirent64 *curr64;
-+        struct linux_dirent *curr32;
-+        /* pos keeps track of where in memory the copy is */
-+        char *pos = copy;
-+        /* ptr keeps track of where in memory the original is */
-+        char *ptr = orig;
-+        /* nleft keeps track of how many bytes we've saved */
-+        unsigned int nleft = 0;
-+
-+        /* while we're still within the memory allowed */
-+        if (get_sysnum(tracee, ORIGINAL) == PR_getdents64) {
-+            while (ptr < orig + res) {
-+
-+                /* get the current struct */
-+                curr64 = (struct linux_dirent64 *)ptr;
-+
-+                /* if the name does not matche a given prefix */
-+                if (!hasprefix(PREFIX, curr64->d_name)) {
-+
-+                    /* copy the information */
-+                    mybcopy(ptr, pos, curr64->d_reclen);
-+
-+                    /* move the pos and nleft */
-+                    pos += curr64->d_reclen;
-+                    nleft += curr64->d_reclen;
-+                }
-+                /* move to the next linux_dirent */
-+                ptr += curr64->d_reclen;
-+            }
-+        } else {
-+            while (ptr < orig + res) {
-+
-+                /* get the current struct */
-+                curr32 = (struct linux_dirent *)ptr;
-+
-+                /* if the name does not matche a given prefix */
-+                if (!hasprefix(PREFIX, curr32->d_name)) {
-+
-+                    /* copy the information */
-+                    mybcopy(ptr, pos, curr32->d_reclen);
-+
-+                    /* move the pos and nleft */
-+                    pos += curr32->d_reclen;
-+                    nleft += curr32->d_reclen;
-+                }
-+                /* move to the next linux_dirent */
-+                ptr += curr32->d_reclen;
-+            }
-+        }
-+        /* If there is nothing left */
-+        if (!nleft) {
-+            /* call getdents again */
-+            if (get_sysnum(tracee, ORIGINAL) == PR_getdents64)
-+                register_chained_syscall(tracee, PR_getdents64, peek_reg(tracee, ORIGINAL, SYSARG_1), orig_start, count, 0, 0, 0);
-+            else
-+                register_chained_syscall(tracee, PR_getdents, peek_reg(tracee, ORIGINAL, SYSARG_1), orig_start, count, 0, 0, 0);
-+        }
-+        else {
-+            /* copy the data back into the register */
-+            status = write_data(tracee, orig_start, copy, nleft);
-+            if (status < 0) {
-+                return status;
-+            }
-+            /* update the return value to match the data */
-+            poke_reg(tracee, SYSARG_RESULT, nleft);
-+        }
-+
-+        /* return successful */
-+        return 0;
-+    }
-+
-+    default:
-+        return 0;
-+    }
-+}
-+
- /**
-  * Handler for this @extension.  It is triggered each time an @event
-  * occurred.  See ExtensionEvent for the meaning of @data1 and @data2.
-+ * This function is fixed to call handle_getdents() and the fix is written
-+ * by Z.OOL. (mailto:zool@zool.jpn.org)
-  */
- int link2symlink_callback(Extension *extension, ExtensionEvent event,
- 			intptr_t data1, intptr_t data2 UNUSED)
-@@ -444,6 +662,8 @@ int link2symlink_callback(Extension *extension, ExtensionEvent event,
- 			{ PR_rename,		FILTER_SYSEXIT },
- 			{ PR_renameat,		FILTER_SYSEXIT },
- 			{ PR_renameat2,		FILTER_SYSEXIT },
-+			{ PR_getdents,		FILTER_SYSEXIT },	/* From hidden_files.c */
-+			{ PR_getdents64,	FILTER_SYSEXIT },	/* From hidden_files.c */
- 			FILTERED_SYSNUM_END,
- 		};
- 		extension->filtered_sysnums = filtered_sysnums;
-@@ -561,8 +781,20 @@ int link2symlink_callback(Extension *extension, ExtensionEvent event,
- 		return 0;
- 	}
- 
--	case SYSCALL_EXIT_END: {
--		return handle_sysexit_end(TRACEE(extension));
-+	case SYSCALL_CHAINED_EXIT: {	/* From hidden_files.c */
-+		return handle_getdents(TRACEE(extension));
-+	}
-+
-+	case SYSCALL_EXIT_END: {	/* From hidden_files.c */
-+		Tracee *tracee = TRACEE(extension);
-+
-+		switch (get_sysnum(tracee, ORIGINAL)) {
-+		case PR_getdents:
-+		case PR_getdents64:
-+			return handle_getdents(tracee);
-+		default:
-+			return handle_sysexit_end(tracee);
-+		}
- 	}
- 
- 	case TRANSLATED_PATH:
 diff --git a/src/path/temp.c b/src/path/temp.c
-index 280ea03..f30f951 100644
+index 8d8aa63..829168a 100644
 --- a/src/path/temp.c
 +++ b/src/path/temp.c
-@@ -24,8 +24,11 @@ const char *get_temp_directory()
+@@ -24,7 +24,11 @@ const char *get_temp_directory()
  
  	temp_directory = getenv("PROOT_TMP_DIR");
  	if (temp_directory == NULL) {
 -		temp_directory = P_tmpdir;
--		return temp_directory;
 +		temp_directory = getenv("PROOT_TMPDIR");
 +		if (temp_directory == NULL) {
 +			temp_directory = P_tmpdir;
@@ -470,21 +408,8 @@ index 280ea03..f30f951 100644
  	}
  
  	tmp = realpath(temp_directory, NULL);
-diff --git a/src/syscall/exit.c b/src/syscall/exit.c
-index 363940d..48b2614 100644
---- a/src/syscall/exit.c
-+++ b/src/syscall/exit.c
-@@ -457,7 +457,7 @@ void translate_syscall_exit(Tracee *tracee)
- 		goto end;
- 	
- 	case PR_utime:
--		if (syscall_result == -ENOSYS)
-+		if ((int)syscall_result == -ENOSYS)
- 		{
- 			fix_and_restart_enosys_syscall(tracee);
- 		}
 diff --git a/src/syscall/rlimit.c b/src/syscall/rlimit.c
-index ac1c4ce..5eeaaba 100644
+index d167843..27efd2a 100644
 --- a/src/syscall/rlimit.c
 +++ b/src/syscall/rlimit.c
 @@ -88,7 +88,7 @@ int translate_setrlimit_exit(const Tracee *tracee, bool is_prlimit)
@@ -500,8 +425,8 @@ index ac1c4ce..5eeaaba 100644
  		VERBOSE(tracee, 1, "can't set stack limit.");
  	return 0; /* Not fatal.  */
  
--	VERBOSE(tracee, 1, "stack soft limit increased to %ld bytes", proot_stack.rlim_cur);
-+	VERBOSE(tracee, 1, "stack soft limit increased to %ld bytes", (long int)proot_stack.rlim_cur);
+-	VERBOSE(tracee, 1, "stack soft limit increased to %llu bytes", proot_stack.rlim_cur);
++	VERBOSE(tracee, 1, "stack soft limit increased to %llu bytes", (long long unsigned int)proot_stack.rlim_cur);
  	return 0;
  }
 diff --git a/src/syscall/socket.c b/src/syscall/socket.c
@@ -577,10 +502,10 @@ index ec74950..6780318 100644
  		if (strlen(shorter_host_path) > sizeof_path)
  			return -EINVAL;
 diff --git a/src/tracee/event.c b/src/tracee/event.c
-index c80b8fc..4db8e06 100644
+index 7310605..501baee 100644
 --- a/src/tracee/event.c
 +++ b/src/tracee/event.c
-@@ -636,7 +636,7 @@ int handle_tracee_event(Tracee *tracee, int tracee_status)
+@@ -637,7 +637,7 @@ int handle_tracee_event(Tracee *tracee, int tracee_status)
  			break;
  
  		case SIGSYS: {
@@ -589,15 +514,52 @@ index c80b8fc..4db8e06 100644
  			ptrace(PTRACE_GETSIGINFO, tracee->pid, NULL, &siginfo);
  			if (siginfo.si_code == SYS_SECCOMP) {
  				if (tracee->skip_next_seccomp_signal) {
+diff --git a/src/tracee/mem.c b/src/tracee/mem.c
+index 5e0d1d9..0aadd68 100644
+--- a/src/tracee/mem.c
++++ b/src/tracee/mem.c
+@@ -192,14 +192,14 @@ static int ptrace_pokedata_or_via_stub(Tracee *tracee, word_t addr, word_t word)
+ 	return status;
+ }
+ 
+-void mem_prepare_after_execve(Tracee *tracee)
++void mem_prepare_after_execve(Tracee *tracee UNUSED)
+ {
+ #if HAS_POKEDATA_WORKAROUND
+ 	tracee->pokedata_workaround_stub_addr = peek_reg(tracee, CURRENT, INSTR_POINTER) + offset_to_pokedata_workaround;
+ #endif
+ }
+ 
+-void mem_prepare_before_first_execve(Tracee *tracee)
++void mem_prepare_before_first_execve(Tracee *tracee UNUSED)
+ {
+ #if HAS_POKEDATA_WORKAROUND
+ 	tracee->pokedata_workaround_stub_addr = (word_t)&launcher_pokedata_workaround;
+diff --git a/src/tracee/reg.c b/src/tracee/reg.c
+index 4c8d254..986e6e6 100644
+--- a/src/tracee/reg.c
++++ b/src/tracee/reg.c
+@@ -262,7 +262,11 @@ int fetch_regs(Tracee *tracee)
+ 	return 0;
+ }
+ 
++#ifdef ARCH_ARM_EABI
+ int push_specific_regs(Tracee *tracee, bool including_sysnum)
++#else
++int push_specific_regs(Tracee *tracee, bool including_sysnum UNUSED)
++#endif
+ {
+ 	int status;
+ 
 diff --git a/src/tracee/seccomp.c b/src/tracee/seccomp.c
-index 0609b10..8a3fee6 100644
+index 7a3893e..1fa186a 100644
 --- a/src/tracee/seccomp.c
 +++ b/src/tracee/seccomp.c
-@@ -2,6 +2,7 @@
- #include <signal.h>    /* SIGSYS, */
- #include <unistd.h>    /* getpgid, */
- #include <utime.h>     /* utimbuf, */
-+#include <string.h>    /* memcpy, */
- 
- #include "cli/note.h"
- #include "syscall/chain.h"
+@@ -230,7 +230,6 @@ static int handle_seccomp_event_common(Tracee *tracee)
+ 	case PR_statfs:
+ 	{
+ 		int size;
+-		int status;
+ 		char path[PATH_MAX];
+ 		char original[PATH_MAX];
+ 		struct statfs64 my_statfs64;

@@ -9,9 +9,8 @@ require "fileutils"
 require "pathname"
 require "optparse"
 
-#TALLOC_VERSION     = "2.1.14"
-TALLOC_VERSION     = "2.2.0"
-#PROOT_VERSION      = "5.1.0.111"
+TALLOC_VERSION     = "2.1.14"
+#PROOT_VERSION      = "5.1.0.112"
 PROOT_VERSION      = "master"
 
 TALLOC_URL         = "https://download.samba.org/pub/talloc/talloc-#{TALLOC_VERSION}.tar.gz"
@@ -266,8 +265,7 @@ class BuildPRootTermux
       args << %[LD="#{@build.ld}"] << %[OBJCOPY="#{@build.objcopy}"]
       args << %[CFLAGS="#{@build.cflags}"] << %[CPPFLAGS="#{@build.cppflags}"] << %[LDFLAGS="#{@build.ldflags}"]
 
-      #args << "./configure" << "configure"
-      args << "./configure" << "build" << "#{@make_opt}"
+      args << "./configure" << "install" << "#{@make_opt}"
       args << "--prefix=#{@build.talloc_prefix}" << "--cross-compile" << "--cross-answers=#{@build.ans_txt}"
       args << "--disable-python" << "--without-gettext" << "--disable-rpath"
 
@@ -275,14 +273,10 @@ class BuildPRootTermux
     end
 
     (Pathname.pwd/"talloc-#{::TALLOC_VERSION}/bin/default").chdir do
-      shell("#{@build.ar}", "rsuv", "./libtalloc.a", "./talloc.c.5.o", "./lib/replace/replace.c.1.o", "./lib/replace/replace.c.2.o", "./lib/replace/cwrap.c.2.o", "./lib/replace/closefrom.c.2.o")
+      shell("#{@build.ar}", "rsuv", "./libtalloc.a", "./talloc_5.o", "./lib/replace/replace_2.o", "./lib/replace/cwrap_2.o", "./lib/replace/closefrom_2.o")
     end
 
-    shell("/bin/mkdir", "-p", "#{@build.talloc_prefix}/lib/pkgconfig")
-    shell("/bin/mkdir", "-p", "#{@build.talloc_prefix}/include")
-    shell("#{@build.install}", "-v", "-m", "0644", "#{Pathname.pwd}/talloc-#{::TALLOC_VERSION}/bin/default/talloc.pc", "#{@build.talloc_prefix}/lib/pkgconfig")
     shell("#{@build.install}", "-v", "-m", "0644", "#{Pathname.pwd}/talloc-#{::TALLOC_VERSION}/bin/default/libtalloc.a", "#{@build.talloc_prefix}/lib")
-    shell("#{@build.install}", "-v", "-m", "0644", "#{Pathname.pwd}/talloc-#{::TALLOC_VERSION}/talloc.h", "#{@build.talloc_prefix}/include")
   end
 
   def build_termux_proot

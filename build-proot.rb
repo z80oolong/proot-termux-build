@@ -10,12 +10,12 @@ require "pathname"
 require "optparse"
 
 TALLOC_VERSION     = "2.1.14"
-#PROOT_VERSION      = "5.1.0.112"
-PROOT_VERSION      = "master"
+PROOT_VERSION      = "5.1.0.112"
+#PROOT_VERSION      = "master"
 
 TALLOC_URL         = "https://download.samba.org/pub/talloc/talloc-#{TALLOC_VERSION}.tar.gz"
-#PROOT_URL          = "https://github.com/z80oolong/proot/archive/v#{PROOT_VERSION}.zip"
-PROOT_URL          = "https://github.com/z80oolong/proot/archive/master.zip"
+PROOT_URL          = "https://github.com/z80oolong/proot/archive/v#{PROOT_VERSION}.zip"
+#PROOT_URL          = "https://github.com/z80oolong/proot/archive/master.zip"
 
 ANDROID_NDK_PREFIX = "/opt/android-ndk"
 ANDROID_NDK_API    = 24

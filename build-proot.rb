@@ -10,7 +10,7 @@ require "pathname"
 require "optparse"
 
 TALLOC_VERSION     = "2.1.14"
-PROOT_VERSION      = "5.1.0.112"
+PROOT_VERSION      = "5.1.0.113"
 #PROOT_VERSION      = "master"
 
 TALLOC_URL         = "https://download.samba.org/pub/talloc/talloc-#{TALLOC_VERSION}.tar.gz"
@@ -306,6 +306,7 @@ class BuildPRootTermux
     if @build.android_ndk_arch.nil? then
       (Pathname.pwd/"cross-compile").mkpath
       shell("#{@build.install}", "-v", "-m", "0755", "#{Pathname.pwd}/proot-#{::PROOT_VERSION}/src/proot", "#{Pathname.pwd}/cross-compile/proot.#{@build.arch}")
+      shell("#{@build.install}", "-v", "-m", "0755", "#{Pathname.pwd}/proot-#{::PROOT_VERSION}/src/proot", "#{Pathname.pwd}/cross-compile/proot-cross.#{@build.arch}")
     else
       (Pathname.pwd/"android-ndk").mkpath
       shell("#{@build.install}", "-v", "-m", "0755", "#{Pathname.pwd}/proot-#{::PROOT_VERSION}/src/proot", "#{Pathname.pwd}/proot.#{@build.arch}")
